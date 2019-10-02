@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/dailyplanner_button"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="@string/dailyplanner_button" />
+    <item
+        android:id="@+id/activityplanner_button"
+        android:icon="@android:drawable/ic_menu_sort_alphabetically"
+        android:title="@string/activityplanner_button" />
+    <item
+        android:id="@+id/stats_button"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="@string/stats_button" />
+</menu>

@@ -1,0 +1,84 @@
+package deagen.smartplanner.logic;
+
+import java.util.ArrayList;
+import java.io.*;
+
+public class ActivityCategory {
+
+	private String name;
+	
+	/**
+	 * The tasks that are within this category.
+	 */
+	private ArrayList<ToDoTask> tasks;
+	
+	public ActivityCategory(String inName) {
+		name = inName;
+		tasks = new ArrayList<>();
+	}
+	
+	public ActivityCategory(ObjectInputStream stream) throws ClassNotFoundException, IOException {
+		this.load(stream);
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public ToDoTask getTask(int position) {
+		return tasks.get(position);
+	}
+
+	public int getNumberOfTasks() {
+		return tasks.size();
+	}
+	
+	public void addToDoTask(int position, ToDoTask task) {
+		task.setCategory(name);
+		tasks.add(position, task);
+	}
+	
+	public void addToDoTask(ToDoTask task) {
+		task.setCategory(name);
+		tasks.add(task);
+	}
+
+	public void moveTask(int from, int to) {
+		ToDoTask task = tasks.remove(from);
+		tasks.add(to, task);
+	}
+
+	public ToDoTask removeTask(int taskPosition) {
+		return tasks.remove(taskPosition);
+	}
+
+	public void removeTask(ToDoTask task) {
+		tasks.remove(task);
+	}
+	
+	public String toString() {
+		return this.getName();
+	}
+	
+	public void save(ObjectOutputStream stream) throws IOException {
+		if(tasks != null) {
+			stream.writeUTF(name);
+			stream.writeInt(tasks.size());
+			for(int i = 0; i < tasks.size(); i++) {
+				tasks.get(i).save(stream);
+			}
+		} else {
+			
+		}
+	}
+	
+	public void load(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		name = stream.readUTF();
+		tasks = new ArrayList<>();
+		int x = stream.readInt();
+		for(int i = 0; i < x; i++) {
+			tasks.add(new ToDoTask(stream));
+		}
+	}
+	
+}
