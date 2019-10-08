@@ -1,12 +1,18 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.taskplanning;
 
 import java.util.ArrayList;
 import java.io.*;
 
+import deagen.smartplanner.logic.tasks.ToDoTask;
+
+/**
+ * Class responsible for keeping track of activities that have not yet been scheduled into the
+ * user's calender.
+ */
 public class ActivityPlanner {
 
 	/**
-	 * All of the categories of activities within the planner.
+	 * Container for each of the categories in which each activity falls into.
 	 */
 	private ArrayList<ActivityCategory> categories;
 	
@@ -17,7 +23,15 @@ public class ActivityPlanner {
 	public ActivityPlanner(ObjectInputStream stream) throws ClassNotFoundException, IOException {
 		this.load(stream);
 	}
-	
+
+	public String getTaskNameInCategory(int categoryPosition, int taskPosition) {
+		return this.getActivityCategory(categoryPosition).getTask(taskPosition).getName();
+	}
+
+	public int getTaskNumberInCategory(int categoryPosition) {
+		return this.getActivityCategory(categoryPosition).getNumberOfTasks();
+	}
+
 	public ActivityCategory getActivityCategory(String inName) {
 		for(ActivityCategory cat : categories) {
 			if(cat.getName().equals(inName))

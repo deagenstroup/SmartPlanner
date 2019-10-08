@@ -29,7 +29,7 @@ public class TaskListAdapter extends SelectionListAdapter {
     @Override
     public void onBindViewHolder(final SelectionHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-        ((TaskHolder)holder).taskText.setText(planner.getTaskNameInCategory(categoryPosition, holder.getAdapterPosition()));
+        ((TaskHolder)holder).taskText.setText(planner.getActivityPlanner().getTaskNameInCategory(categoryPosition, holder.getAdapterPosition()));
     }
 
     @Override
@@ -39,7 +39,7 @@ public class TaskListAdapter extends SelectionListAdapter {
 
     @Override
     public int getItemCount() {
-        return planner.getTaskNumberInCategory(categoryPosition);
+        return planner.getActivityPlanner().getTaskNumberInCategory(categoryPosition);
     }
 
     @Override

@@ -1,16 +1,16 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.taskscheduling;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.IBinder;
 
 import java.time.Duration;
 import java.time.LocalTime;
 
 import deagen.smartplanner.fragments.DailyPlannerFragment;
+import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 import deagen.smartplanner.service.TaskManagerService;
 
 /**

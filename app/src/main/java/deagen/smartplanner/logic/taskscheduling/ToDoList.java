@@ -1,7 +1,10 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.taskscheduling;
 
 import java.util.ArrayList;
 import java.io.*;
+
+import deagen.smartplanner.logic.tasks.CompletedToDoTask;
+import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 
 /**
  * Keeps track of completed tasks and scheduled tasks.

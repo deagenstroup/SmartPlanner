@@ -41,8 +41,7 @@ import deagen.smartplanner.R;
 import deagen.smartplanner.ui.ScheduledListAdapter;
 import deagen.smartplanner.service.TaskManagerService;
 import deagen.smartplanner.logic.Planner;
-import deagen.smartplanner.logic.ScheduledToDoTask;
-import deagen.smartplanner.logic.DailyPlannerUserInterface;
+import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 
 
 /**
@@ -311,13 +310,13 @@ public class DailyPlannerFragment extends Fragment {
         // swapping out the respective lists within the container and adjusting ui accordingly
         if(scheduledMode) {
             layout.removeView(scheduledListView);
-            constraintLayout.removeView(addButton);
+            setAddButtonVisible(false);
             setDeleteButtonVisible(false);
             layout.addView(completedListView);
         } else {
             layout.removeView(completedListView);
             layout.addView(scheduledListView);
-            constraintLayout.addView(addButton);
+            setAddButtonVisible(true);
             setDeleteButtonVisible(true);
         }
 
@@ -329,16 +328,39 @@ public class DailyPlannerFragment extends Fragment {
      * @param visible If true, delete button is visible, otherwise it is hidden.
      */
     public void setDeleteButtonVisible(boolean visible) {
+        // if the user is trying to make the delete button visible, it doesn't already exist in
+        // the layout, and there is a task selected for the user to delete, then add the button
         if(visible && constraintLayout.findViewById(R.id.dailyplanner_delete_button) == null
         && ((ScheduledListAdapter)scheduledListView.getAdapter()).hasSelected()) {
             constraintLayout.addView(deleteButton);
-        } else {
+        }
+        // otherwise if trying to make the delete button invisible, check to make sure it is actually
+        // in the layout before attempting to remove it
+        else if(!visible && constraintLayout.findViewById(R.id.dailyplanner_delete_button) != null) {
             constraintLayout.removeView(deleteButton);
+        }
+    }
+
+    /**
+     * Sets whether the add button is visible to the user or not.
+     * @param visible If true, button is visible, otherwise false.
+     */
+    public void setAddButtonVisible(boolean visible) {
+        // if trying to make the add button visible and it doesn't already exist in layout, then add the button
+        if(visible && constraintLayout.findViewById(R.id.dailyplanner_add_button) == null) {
+            constraintLayout.addView(addButton);
+        }
+        // if trying to make the add button invisible and it does already exist in
+        // the layout, then add the button
+        else if(!visible && constraintLayout.findViewById(R.id.dailyplanner_add_button) != null) {
+            constraintLayout.removeView(addButton);
         }
     }
 
     public void setCurrentTaskHighlight(boolean highlight) {
         ScheduledListAdapter.ScheduledHolder holder = (ScheduledListAdapter.ScheduledHolder) scheduledListView.findViewHolderForAdapterPosition(0);
+        if(holder == null)
+            return;
         if(!highlight) {
             holder.layoutView.setBackgroundColor(Color.TRANSPARENT);
         } else {
@@ -385,7 +407,7 @@ public class DailyPlannerFragment extends Fragment {
         builder.setTitle("Choose category for task: ");
         final int selectedPosition = 0;
 
-        final String[] categories = planner.getCategories();
+        final String[] categories = planner.getActivityPlanner().getCategories();
         final Spinner spinner = new Spinner(builder.getContext());
         ArrayAdapter arrayAdapter = new ArrayAdapter(builder.getContext(), android.R.layout.simple_spinner_item, categories);
         spinner.setAdapter(arrayAdapter);

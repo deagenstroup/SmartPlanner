@@ -1,7 +1,9 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.taskplanning;
 
 import java.util.ArrayList;
 import java.io.*;
+
+import deagen.smartplanner.logic.tasks.ToDoTask;
 
 public class ActivityCategory {
 

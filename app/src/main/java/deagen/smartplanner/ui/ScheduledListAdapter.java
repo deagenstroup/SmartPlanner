@@ -10,7 +10,7 @@ import android.widget.TextView;
 import deagen.smartplanner.R;
 import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.Planner;
-import deagen.smartplanner.logic.ScheduledToDoTask;
+import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 
 public class ScheduledListAdapter extends SelectionListAdapter {
 

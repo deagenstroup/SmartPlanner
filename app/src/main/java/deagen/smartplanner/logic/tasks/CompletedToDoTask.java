@@ -1,4 +1,4 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.tasks;
 import java.time.Duration;
 import java.io.IOException;
 import java.io.ObjectInputStream;

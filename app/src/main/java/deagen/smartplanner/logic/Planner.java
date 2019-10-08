@@ -1,6 +1,14 @@
 package deagen.smartplanner.logic;
 
 import deagen.smartplanner.fragments.DailyPlannerFragment;
+import deagen.smartplanner.logic.taskplanning.ActivityCategory;
+import deagen.smartplanner.logic.taskplanning.ActivityPlanner;
+import deagen.smartplanner.logic.tasks.CompletedToDoTask;
+import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
+import deagen.smartplanner.logic.tasks.ToDoTask;
+import deagen.smartplanner.logic.taskscheduling.ListCalendar;
+import deagen.smartplanner.logic.taskscheduling.TaskManager;
+import deagen.smartplanner.logic.taskscheduling.ToDoList;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -10,8 +18,6 @@ import java.io.*;
 
 /**
  * A wrapper class for interfacing the core functionality of the planner application.
- * dates.
- * @author Deagen Stroup
  */
 public class Planner {
 	
@@ -24,27 +30,31 @@ public class Planner {
 	private LocalDate selectedDate;
 
 	/**
-	 * The calendar which contains all of the ToDoLists.
+	 * The calendar which contains all of the ToDoLists for the days on which they are planned.
 	 */
 	private ListCalendar calendar;
 	
 	/**
-	 * Object which provides time statistics for the planner.
+	 * Object which analyzes the completed tasks within the calender and provides statistics about
+	 * them.
 	 */
 	private TimeAnalyzer timeAnalyzer;
 	
 	/**
-	 * Manages active completion of tasks for the current day.
+	 * Manages the tasks for the selected day in real time, providing the user with notifications
+	 * and reminders for the completion and time expended on tasks.
 	 */
 	private TaskManager taskManager;
-	
+
+	/**
+	 * Object which allows the user to keep track of activities to be done, but not yet scheduled
+	 * into a specific day.
+	 */
 	private ActivityPlanner activityPlanner;
 	
 	{
 		this.selectedDate = LocalDate.now();
 		calendar = null;
-		timeAnalyzer = null;
-		taskManager = null;
 		activityPlanner = null;
 	}
 
@@ -54,13 +64,6 @@ public class Planner {
 		this.taskManager = new TaskManager(this.getSelectedToDoList());
 		this.activityPlanner = new ActivityPlanner();
 	}
-
-	/*public Planner() {
-		this.calendar = new ListCalendar();
-		this.timeAnalyzer = new TimeAnalyzer(this.calendar);
-		this.taskManager = new TaskManager(this.getSelectedToDoList());
-		this.activityPlanner = new ActivityPlanner();
-	}*/
 	
 	/**
 	 * Constructs the Planner object by loading values from the file provided.
@@ -70,23 +73,53 @@ public class Planner {
 		this.timeAnalyzer = new TimeAnalyzer(this.calendar);
 		this.taskManager = new TaskManager(this.getSelectedToDoList());
 	}
-	
+
+
+
+	// file I/O methods
+
 	/**
-	 * @return True if a ToDoList exists for the selected date, false otherwise.
+	 * Save the planner to the designated file
 	 */
-	public boolean selectedToDoListExists() {
-		if(this.getSelectedToDoList() != null)
-			return true;
-		else
-			return false;
-	}
-	
-	public ActivityPlanner getActivityPlanner() {
-		return activityPlanner;
+	private void save() {
+		if(fileName == null)
+			return;
+		try {
+			ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(new File(fileName)));
+			calendar.save(stream);
+			activityPlanner.save(stream);
+			stream.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public String[] getCategories() {
-		return this.getActivityPlanner().getCategories();
+	/**
+	 * Load a planner into the object from designate file
+	 */
+	private void load(String inFileName) throws FileNotFoundException {
+		fileName = inFileName;
+		try {
+			ObjectInputStream stream = new ObjectInputStream(new FileInputStream(new File(fileName)));
+			calendar = new ListCalendar(stream);
+			activityPlanner = new ActivityPlanner(stream);
+		} catch(FileNotFoundException e) {
+			throw(e);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+	// simple accessors
+
+	public LocalDate getDate() {
+		return selectedDate;
+	}
+
+	public ActivityPlanner getActivityPlanner() {
+		return activityPlanner;
 	}
 
 	/**
@@ -96,27 +129,27 @@ public class Planner {
 		return calendar.getToDoList(this.getDate());
 	}
 
-	public String getTaskNameInCategory(int categoryPosition, int taskPosition) {
-		return this.getActivityPlanner().getActivityCategory(categoryPosition).getTask(taskPosition).getName();
+	/**
+	 * @return True if a ToDoList exists for the selected date, false otherwise.
+	 */
+	public boolean selectedToDoListExists() {
+		if(this.getSelectedToDoList() != null)
+			return true;
+		else
+			return false;
 	}
 
-	public int getTaskNumberInCategory(int categoryPosition) {
-		return this.getActivityPlanner().getActivityCategory(categoryPosition).getNumberOfTasks();
-	}
 
-	public LocalDate getDate() {
-		return selectedDate;
-	}
-	
-	public LocalTime getCurrentActivityEnd() {
-		return taskManager.getCurrentActivityEnd();
-	}
-	
+
+	// simple modifiers
+
 	public void selectDate(LocalDate date) {
 		selectedDate = date;
 		taskManager.setToDoList(this.getSelectedToDoList());
 }
 
+
+	// TASK MANAGER REFRACTOR
 	public boolean isActive() {
 		return taskManager.isActive();
 	}
@@ -138,6 +171,8 @@ public class Planner {
 	public void cutShortCurrentTask(Duration inDur) {
 		taskManager.cutShortCurrentActivity(inDur);
 	}
+
+
 
 	public ScheduledToDoTask getScheduledTask(int position) {
 		return this.getScheduledTasks().get(position);
@@ -235,56 +270,10 @@ public class Planner {
 		fileName = inFileName;
 		this.save();
 	}
-	
+
 	/**
-	 * Save the planner to the designated file
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+	 * Used to add stub values to the Planner for testing purposes.
 	 */
-	public void save() {
-		if(fileName == null)
-			return;
-		try {
-			ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(new File(fileName)));
-			calendar.save(stream);
-			activityPlanner.save(stream);
-			stream.close();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Load a planner into the object from designate file
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
-	 * @throws ClassNotFoundException 
-	 */
-	public void load(String inFileName) throws FileNotFoundException {
-		fileName = inFileName;
-		try {
-			ObjectInputStream stream = new ObjectInputStream(new FileInputStream(new File(fileName)));
-			calendar = new ListCalendar(stream);
-			activityPlanner = new ActivityPlanner(stream);
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-//	/**
-//	 * @return the current task of the selected ToDoList
-//	 */
-//	public ScheduledToDoTask getCurrentTask() {
-//		return this.getSelectedToDoList().getCurrentTask();
-//	}
-	
-	//testing methods
-//	public void addExampleValues() {
-//		if(!this.selectedToDoListExists())
-//			this.addToDoList(new ToDoList(), selectedDate);
-//		this.getSelectedToDoList().fillWithTestTasks();
-//	}/**/
-//
 	public void addTestValues() {
 		ToDoList list;
 		list = new ToDoList();

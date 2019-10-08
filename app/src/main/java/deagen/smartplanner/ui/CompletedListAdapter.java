@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import deagen.smartplanner.R;
 import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.Planner;
-import deagen.smartplanner.logic.CompletedToDoTask;
+import deagen.smartplanner.logic.tasks.CompletedToDoTask;
 
 public class CompletedListAdapter extends ListAdapter {
 

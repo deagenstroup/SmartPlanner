@@ -4,6 +4,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import deagen.smartplanner.logic.tasks.CompletedToDoTask;
+import deagen.smartplanner.logic.taskscheduling.ListCalendar;
+import deagen.smartplanner.logic.taskscheduling.ToDoList;
+
 /**
  * Provides time statistics for a ListCalender
  * @author Deagen

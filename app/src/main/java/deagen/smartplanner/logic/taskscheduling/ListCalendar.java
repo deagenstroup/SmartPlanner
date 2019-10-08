@@ -1,4 +1,4 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.taskscheduling;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -7,6 +7,8 @@ import java.util.Map;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+
+import deagen.smartplanner.logic.taskscheduling.ToDoList;
 
 /**
  * A class for managing ToDoLists within a calendar.

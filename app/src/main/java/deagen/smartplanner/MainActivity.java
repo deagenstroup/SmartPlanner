@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
         view.setOnNavigationItemSelectedListener(this);
 
         dailyPlanner = new DailyPlannerFragment();
-        activityPlanner = ActivityPlannerFragment.newInstance(null, null);
+        activityPlanner = new ActivityPlannerFragment();
         statsViewer = StatisticsFragment.newInstance(null, null);
 
         planner = new Planner();

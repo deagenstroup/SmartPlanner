@@ -26,7 +26,7 @@ public class CategoryListAdapter extends SelectionListAdapter {
     @Override
     public void onBindViewHolder(final SelectionHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-        ((CategoryHolder)holder).categoryText.setText(planner.getCategories()[position]);
+        ((CategoryHolder)holder).categoryText.setText(planner.getActivityPlanner().getCategories()[position]);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class CategoryListAdapter extends SelectionListAdapter {
 
     @Override
     public int getItemCount() {
-        return planner.getCategories().length;
+        return planner.getActivityPlanner().getCategories().length;
     }
 
     @Override

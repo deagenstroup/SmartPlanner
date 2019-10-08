@@ -15,8 +15,8 @@ import android.util.Log;
 import java.time.Duration;
 
 import deagen.smartplanner.logic.DailyPlannerUserInterface;
-import deagen.smartplanner.logic.ScheduledToDoTask;
-import deagen.smartplanner.logic.TaskManager;
+import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
+import deagen.smartplanner.logic.taskscheduling.TaskManager;
 
 /**
  * A service on which the TaskManager object can perform its duties. Service provides a thread

@@ -1,9 +1,12 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.tasks;
 
 import java.time.Duration;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
+import deagen.smartplanner.logic.tasks.CompletedToDoTask;
+import deagen.smartplanner.logic.tasks.ToDoTask;
 
 public class ScheduledToDoTask extends ToDoTask {
 	
