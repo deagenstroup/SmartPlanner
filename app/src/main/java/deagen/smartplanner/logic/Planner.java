@@ -112,7 +112,7 @@ public class Planner {
 
 
 
-	// simple accessors
+	// accessors
 
 	public LocalDate getDate() {
 		return selectedDate;
@@ -120,6 +120,10 @@ public class Planner {
 
 	public ActivityPlanner getActivityPlanner() {
 		return activityPlanner;
+	}
+
+	public TaskManager getTaskManager() {
+		return taskManager;
 	}
 
 	/**
@@ -139,41 +143,6 @@ public class Planner {
 			return false;
 	}
 
-
-
-	// simple modifiers
-
-	public void selectDate(LocalDate date) {
-		selectedDate = date;
-		taskManager.setToDoList(this.getSelectedToDoList());
-}
-
-
-	// TASK MANAGER REFRACTOR
-	public boolean isActive() {
-		return taskManager.isActive();
-	}
-
-	public void startTasks(DailyPlannerFragment fragment) {
-		taskManager.startTasks(fragment);
-	}
-
-	public void startTasks() { taskManager.startTasks(); }
-
-	public void stopTasks() {
-		taskManager.stopTasks();
-	}
-
-	public void extendCurrentTask(Duration inDur) {
-		taskManager.extendCurrentActivity(inDur);
-	}
-	
-	public void cutShortCurrentTask(Duration inDur) {
-		taskManager.cutShortCurrentActivity(inDur);
-	}
-
-
-
 	public ScheduledToDoTask getScheduledTask(int position) {
 		return this.getScheduledTasks().get(position);
 	}
@@ -190,7 +159,7 @@ public class Planner {
 			return null;
 		return this.getSelectedToDoList().getScheduledTasks();
 	}
-	
+
 	/**
 	 * @return All of the tasks for the day which have been completed.
 	 */
@@ -198,6 +167,34 @@ public class Planner {
 		if(this.getSelectedToDoList() == null)
 			return null;
 		return this.getSelectedToDoList().getCompletedTasks();
+	}
+
+	public Duration getTodaysTimeSpent(String category) {
+		return timeAnalyzer.getDailyTimeSpent(this.getDate(), category);
+	}
+
+	public Duration getThisWeeksTimeSpent(String category) {
+		return timeAnalyzer.getWeeklyTimeSpent(this.getDate(), category);
+	}
+
+	public Duration getThisMonthsTimeSpent(String category) {
+		return timeAnalyzer.getMonthlyTimeSpent(selectedDate, category);
+	}
+
+	public Duration getThisWeeklyAverage(String category) {
+		return timeAnalyzer.getWeeklyAverage(this.getDate(), category);
+	}
+
+	public Duration getThisMonthlyAverage(String category) {
+		return timeAnalyzer.getMonthlyAverage(this.getDate(), category);
+	}
+
+
+	// modifiers
+
+	public void selectDate(LocalDate date) {
+		selectedDate = date;
+		taskManager.setToDoList(this.getSelectedToDoList());
 	}
 	
 	/**
@@ -208,62 +205,13 @@ public class Planner {
 			calendar.addToDoList(new ToDoList(), selectedDate);
 		this.getSelectedToDoList().addTask(task);
 	}
-
-	public void addTaskToCategory(int categoryPosition, ToDoTask task) {
-		this.getActivityPlanner().getActivityCategory(categoryPosition).addToDoTask(task);
-	}
 	
 	public ScheduledToDoTask removeTask(int position) {
 		return this.getSelectedToDoList().removeTask(position);
 	}
 
-	public ToDoTask removeTaskFromCategory(int categoryPosition, int taskPosition) {
-		return this.getActivityPlanner().getActivityCategory(categoryPosition).removeTask(taskPosition);
-	}
-
-	public ActivityCategory removeActivityCategory(int categoryPosition) {
-		return this.getActivityPlanner().removeActivityCategory(categoryPosition);
-	}
-
 	public void moveScheduledTask(int from, int to) {
 		this.getSelectedToDoList().moveTask(from, to);
-	}
-
-	public void moveCategory(int from, int to) {
-		activityPlanner.moveActivityCategory(from, to);
-	}
-
-	public void moveTaskInCategory(int categoryPosition, int from, int to) {
-		ActivityCategory category = this.getActivityPlanner().getActivityCategory(categoryPosition);
-		category.moveTask(from, to);
-	}
-
-	public void extendCurrentActivity(Duration inDuration) {
-		taskManager.extendCurrentActivity(inDuration);
-	}
-	
-	public void cutShortCurrentActivity(Duration inDuration) {
-		taskManager.cutShortCurrentActivity(inDuration);
-	}
-	
-	public Duration getTodaysTimeSpent(String category) {
-		return timeAnalyzer.getDailyTimeSpent(this.getDate(), category);
-	}
-	
-	public Duration getThisWeeksTimeSpent(String category) {
-		return timeAnalyzer.getWeeklyTimeSpent(this.getDate(), category);
-	}
-
-	public Duration getThisMonthsTimeSpent(String category) {
-		return timeAnalyzer.getMonthlyTimeSpent(selectedDate, category);
-	}
-	
-	public Duration getThisWeeklyAverage(String category) {
-		return timeAnalyzer.getWeeklyAverage(this.getDate(), category);
-	}
-	
-	public Duration getThisMonthlyAverage(String category) {
-		return timeAnalyzer.getMonthlyAverage(this.getDate(), category);
 	}
 	
 	public void save(String inFileName) {

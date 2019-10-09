@@ -46,7 +46,7 @@ public class CategoryListAdapter extends SelectionListAdapter {
     }
 
     public void moveItem(int fromPos, int toPos) {
-        planner.moveCategory(fromPos, toPos);
+        planner.getActivityPlanner().moveActivityCategory(fromPos, toPos);
     }
 
     @Override

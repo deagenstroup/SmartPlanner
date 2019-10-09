@@ -217,14 +217,14 @@ public class DailyPlannerFragment extends Fragment {
         startStopButton.setOnClickListener(new ImageButton.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(planner.isActive()) {
-                    planner.stopTasks();
+                if(planner.getTaskManager().isActive()) {
+                    planner.getTaskManager().stopTasks();
                     startStopButton.setImageResource(android.R.drawable.ic_media_play);
                     constraintLayout.addView(addButton);
                     ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(true);
                     setCurrentTaskHighlight(false);
                 } else {
-                    planner.startTasks(fragment);
+                    planner.getTaskManager().startTasks(fragment);
                     startStopButton.setImageResource(android.R.drawable.ic_media_pause);
                     constraintLayout.removeView(addButton);
                     ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(false);

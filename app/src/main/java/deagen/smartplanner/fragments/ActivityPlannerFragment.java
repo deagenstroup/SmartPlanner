@@ -169,18 +169,17 @@ public class ActivityPlannerFragment extends Fragment {
         addButton.setOnClickListener(new FloatingActionButton.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("DEV", "add button pressed - add a task category");
+//                Log.d("DEV", "add button pressed - add a task category");
             }
         });
 
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("DEV", "delete button pressed - delete a task category");
                 CategoryListAdapter adapter = ((CategoryListAdapter)categoryView.getAdapter());
                 int removePosition = selectedCategoryPosition;
                 adapter.unselectHolder();
-                planner.removeActivityCategory(removePosition);
+                planner.getActivityPlanner().removeActivityCategory(removePosition);
                 adapter.notifyDataSetChanged();
             }
         });
@@ -222,17 +221,20 @@ public class ActivityPlannerFragment extends Fragment {
         addButton.setOnClickListener(new FloatingActionButton.OnClickListener() {
            @Override
            public void onClick(View view) {
-               Log.d("DEV", "add button pressed - add a task");
+               // creating a dialog to get task info from the user
                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                final ToDoTask task = new ToDoTask();
                builder.setTitle("Input task name: ");
                final EditText input = new EditText(builder.getContext());
                builder.setView(input);
+
+               // setting listeners for the buttons of the dialog
                builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
                    @Override
                    public void onClick(DialogInterface dialog, int which) {
                        task.setName(input.getText().toString());
-                       planner.addTaskToCategory(selectedCategoryPosition, task);
+                       // adding the task to the selected category
+                       planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition).addToDoTask(task);
                        taskView.getAdapter().notifyDataSetChanged();
                    }
                });
@@ -245,15 +247,14 @@ public class ActivityPlannerFragment extends Fragment {
                builder.show();
            }
         });
-
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("DEV", "delete button pressed - delete a task");
+                // unselecting the selected task and removing from the planner
                 TaskListAdapter adapter = ((TaskListAdapter)taskView.getAdapter());
                 int selectedTaskPosition = adapter.getSelectedHolderPosition();
                 adapter.unselectHolder();
-                planner.removeTaskFromCategory(selectedCategoryPosition, selectedTaskPosition);
+                planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition).removeTask(selectedTaskPosition);
                 adapter.notifyDataSetChanged();
             }
         });

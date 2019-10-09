@@ -34,7 +34,7 @@ public class TaskListAdapter extends SelectionListAdapter {
 
     @Override
     public void moveItem(int fromPos, int toPos) {
-        planner.moveTaskInCategory(categoryPosition, fromPos, toPos);
+        planner.getActivityPlanner().getActivityCategory(categoryPosition).moveTask(fromPos, toPos);
     }
 
     @Override
