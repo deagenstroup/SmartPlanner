@@ -1,6 +1,5 @@
 package deagen.smartplanner.logic;
 
-import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.taskplanning.ActivityCategory;
 import deagen.smartplanner.logic.taskplanning.ActivityPlanner;
 import deagen.smartplanner.logic.tasks.CompletedToDoTask;
@@ -12,7 +11,6 @@ import deagen.smartplanner.logic.taskscheduling.ToDoList;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.io.*;
 
@@ -129,18 +127,15 @@ public class Planner {
 	/**
 	 * @return The ToDoList for the selected date.
 	 */
-	public ToDoList getSelectedToDoList() {
+	private ToDoList getSelectedToDoList() {
 		return calendar.getToDoList(this.getDate());
 	}
 
 	/**
 	 * @return True if a ToDoList exists for the selected date, false otherwise.
 	 */
-	public boolean selectedToDoListExists() {
-		if(this.getSelectedToDoList() != null)
-			return true;
-		else
-			return false;
+	private boolean selectedToDoListExists() {
+		return this.getSelectedToDoList() != null;
 	}
 
 	public ScheduledToDoTask getScheduledTask(int position) {
@@ -206,8 +201,8 @@ public class Planner {
 		this.getSelectedToDoList().addTask(task);
 	}
 	
-	public ScheduledToDoTask removeTask(int position) {
-		return this.getSelectedToDoList().removeTask(position);
+	public void removeTask(int position) {
+		this.getSelectedToDoList().removeTask(position);
 	}
 
 	public void moveScheduledTask(int from, int to) {
