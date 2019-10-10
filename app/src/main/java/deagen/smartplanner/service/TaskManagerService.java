@@ -3,17 +3,20 @@ package deagen.smartplanner.service;
 import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.time.Duration;
 
+import deagen.smartplanner.MainActivity;
 import deagen.smartplanner.logic.DailyPlannerUserInterface;
 import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 import deagen.smartplanner.logic.taskscheduling.TaskManager;
@@ -39,11 +42,14 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
     private NotificationCompat.Builder notificationBuilder;
 
     /**
-     * Manager for the notification which displays the status of the current task and task
-     * completed notifications.
+     * Manager which initially displays and updates the notification which displays the status of
+     * the current task and task completed notifications.
      */
     private NotificationManager notificationManager;
 
+    /**
+     * Sends broadcast messages which are used to inform the DailyPlannerFragment to update the UI.
+     */
     private LocalBroadcastManager broadcaster;
 
     private String notificationChannelId;
@@ -114,11 +120,24 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
     public void createCurrentTaskNotification() {
         notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder = new NotificationCompat.Builder(this);
+
         ScheduledToDoTask task = taskManager.getCurrentTask();
         String notificationText = task.getName() + " - " + task.getTimeRemainingString();
         notificationBuilder.setSmallIcon(android.R.drawable.ic_dialog_info);
         notificationBuilder.setContentTitle("Active Task");
         notificationBuilder.setContentText(notificationText);
+
+//        Intent activityIntent = new Intent(this, MainActivity.class);
+//        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//        TaskStackBuilder builder = TaskStackBuilder.create(this);
+//        builder.addNextIntentWithParentStack(activityIntent);
+//        notificationBuilder.setContentIntent(builder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP));
+
+        Intent activityIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        activityIntent.setPackage(null);
+        notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, activityIntent, 0));
+
         if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             notificationChannelId = "planner";
             NotificationChannel channel = new NotificationChannel(notificationChannelId,
@@ -130,12 +149,19 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         notificationManager.notify(1, notificationBuilder.build());
     }
 
+    /**
+     * Sends messages to the DailyPlannerFragment object telling it to update the UI.
+     * @param message
+     */
     public void sendUpdateMessage(String message) {
         Intent intent = new Intent(UPDATE_UI);
         intent.putExtra(UPDATE_UI, message);
         broadcaster.sendBroadcast(intent);
     }
 
+    /**
+     *
+     */
     public void updateCurrentTask() {
         ScheduledToDoTask task = taskManager.getCurrentTask();
         String notificationText = task.getName() + " - " + task.getTimeRemainingString();

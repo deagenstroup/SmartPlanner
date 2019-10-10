@@ -19,6 +19,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,6 +135,8 @@ public class DailyPlannerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d("DEV", "onCreate called in the DailyPlannerFragment");
 
         // initializing the receiver to update the fragment's UI upon receiving a message from
         // the TaskManagerService
@@ -286,8 +289,9 @@ public class DailyPlannerFragment extends Fragment {
         DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                month++;
                 planner.selectDate(LocalDate.of(year, month, dayOfMonth));
-                ((TextView)view.findViewById(R.id.date_text)).setText("" + month + "/" + dayOfMonth + "/" + year);
+                ((TextView)constraintLayout.findViewById(R.id.date_text)).setText("" + month + "/" + dayOfMonth + "/" + year);
                 scheduledListView.getAdapter().notifyDataSetChanged();
                 completedListView.getAdapter().notifyDataSetChanged();
             }
@@ -296,7 +300,7 @@ public class DailyPlannerFragment extends Fragment {
         // initializing and displaying the dialog for selecting the date
         LocalDate currentDate = planner.getDate();
         DatePickerDialog picker = new DatePickerDialog(this.getContext(), listener,
-                currentDate.getYear(), currentDate.getMonthValue(), currentDate.getDayOfMonth());
+                currentDate.getYear(), currentDate.getMonthValue()-1, currentDate.getDayOfMonth());
         picker.show();
     }
 
