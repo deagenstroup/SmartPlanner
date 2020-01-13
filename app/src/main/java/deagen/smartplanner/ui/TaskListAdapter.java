@@ -45,12 +45,12 @@ public class TaskListAdapter extends SelectionListAdapter {
     @Override
     public void selectHolder(SelectionHolder selectionHolder) {
         super.selectHolder(selectionHolder);
-        ((ActivityPlannerFragment)fragment).setDeleteButtonVisible(true);
+        ((ActivityPlannerFragment)fragment).setEditButtonsVisible(true);
     }
 
     public SelectionHolder unselectHolder() {
         SelectionHolder holder = super.unselectHolder();
-        ((ActivityPlannerFragment)fragment).setDeleteButtonVisible(false);
+        ((ActivityPlannerFragment)fragment).setEditButtonsVisible(false);
         return holder;
     }
 

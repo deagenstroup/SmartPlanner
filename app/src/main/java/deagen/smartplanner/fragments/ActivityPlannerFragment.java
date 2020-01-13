@@ -18,6 +18,10 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.time.Duration;
+
+import deagen.smartplanner.logic.taskplanning.ActivityCategory;
+import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 import deagen.smartplanner.ui.CategoryListAdapter;
 import deagen.smartplanner.MainActivity;
 import deagen.smartplanner.R;
@@ -64,9 +68,9 @@ public class ActivityPlannerFragment extends Fragment {
     /**
      * Buttons in for adding and deleting tasks and task categories
      */
-    private FloatingActionButton addButton, deleteButton;
+    private FloatingActionButton addButton, deleteButton, scheduleButton;
 
-    private int selectedCategoryPosition;
+    private int selectedCategoryPosition = -1;
 
     private OnFragmentInteractionListener mListener;
 
@@ -97,7 +101,8 @@ public class ActivityPlannerFragment extends Fragment {
         // initializing the add and delete buttons and making the delete button invisible initially
         addButton = constraintLayout.findViewById(R.id.activityplanner_add_button);
         deleteButton = constraintLayout.findViewById(R.id.activityplanner_delete_button);
-        setDeleteButtonVisible(false);
+        scheduleButton = constraintLayout.findViewById(R.id.activityplanner_schedule_button);
+        setEditButtonsVisible(false);
 
         // setting the list of categories to be displayed
         setCategoryView();
@@ -146,14 +151,29 @@ public class ActivityPlannerFragment extends Fragment {
     }
 
     /**
-     * Sets whether the delete button is visible on screen or not.
-     * @param visible If true, delete button is visible, otherwise it is hidden.
+     * Sets whether the edit buttons for the task (schedule & delete) are visible on screen or not.
+     * @param visible If true, buttons are visible, otherwise they are hidden.
      */
-    public void setDeleteButtonVisible(boolean visible) {
-        if(visible && constraintLayout.findViewById(R.id.activityplanner_delete_button) == null) {
-            constraintLayout.addView(deleteButton);
+    public void setEditButtonsVisible(boolean visible) {
+//        if(visible && constraintLayout.findViewById(R.id.activityplanner_delete_button) == null) {
+//            constraintLayout.addView(deleteButton);
+//        } else {
+//            constraintLayout.removeView(deleteButton);
+//        }
+        if(visible) {
+            ((View) deleteButton).setVisibility(View.VISIBLE);
+            ((View) scheduleButton).setVisibility(View.VISIBLE);
         } else {
-            constraintLayout.removeView(deleteButton);
+            ((View) deleteButton).setVisibility(View.GONE);
+            ((View) scheduleButton).setVisibility(View.GONE);
+        }
+    }
+
+    public void setDeleteButtonVisible(boolean visible) {
+        if(visible) {
+            ((View) deleteButton).setVisibility(View.VISIBLE);
+        } else {
+            ((View) deleteButton).setVisibility(View.GONE);
         }
     }
 
@@ -213,7 +233,7 @@ public class ActivityPlannerFragment extends Fragment {
             public void onBackKeyPressed() {
                 recycleViewContainer.removeView(taskView);
                 setCategoryView();
-                setDeleteButtonVisible(false);
+                setEditButtonsVisible(false);
             }
         });
 
@@ -252,14 +272,36 @@ public class ActivityPlannerFragment extends Fragment {
             public void onClick(View v) {
                 // unselecting the selected task and removing from the planner
                 TaskListAdapter adapter = ((TaskListAdapter)taskView.getAdapter());
-                int selectedTaskPosition = adapter.getSelectedHolderPosition();
                 adapter.unselectHolder();
-                planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition).removeTask(selectedTaskPosition);
+                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
                 adapter.notifyDataSetChanged();
+            }
+        });
+        scheduleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TaskListAdapter adapter = ((TaskListAdapter) taskView.getAdapter());
+                ToDoTask task = getSelectedActivityCategory().getTask(adapter.getSelectedHolderPosition());
+                ScheduledToDoTask scheduledTask = new ScheduledToDoTask(task, Duration.ofMinutes(10L));
+                mainActivity.switchFragments(mainActivity.getDailyPlannerFragment());
+                mainActivity.tapNavigationButton(0);
+                mainActivity.getDailyPlannerFragment().changeTaskTime(scheduledTask);
+                planner.addTask(scheduledTask);
+                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
+                adapter.unselectHolder();
+                adapter.notifyDataSetChanged();
+                mainActivity.getDailyPlannerFragment().updateCurrentTask();
             }
         });
     }
 
+    /**
+     * Adds the currently selected task into the current DailyPlanner schedule and removes it from
+     * the ActivityPlanner.
+     */
+    public void scheduleSelectedTask() {
+
+    }
 
     public void addTaskCategory() {
 
@@ -267,6 +309,14 @@ public class ActivityPlannerFragment extends Fragment {
 
     public void addTask() {
 
+    }
+
+    public ActivityCategory getSelectedActivityCategory() {
+        //if the user is in the category selection screen then no category is currently selected
+        if(selectedCategoryPosition < 0)
+            return null;
+
+        return planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition);
     }
 
     public int getSelectedCategoryPosition() {

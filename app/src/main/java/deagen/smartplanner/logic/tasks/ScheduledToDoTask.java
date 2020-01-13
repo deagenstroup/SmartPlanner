@@ -29,6 +29,15 @@ public class ScheduledToDoTask extends ToDoTask {
 		this.setAllocatedTime(inAllocatedTime);
 		timeSpent = Duration.ofMinutes(0);
 	}
+
+	/**
+	 * Creates a ScheduledToDoTask from a regular ToDoTask
+	 * @param inTask ToDoTask to be converted
+	 * @param inDur Duration of time that the task is scheduled for
+	 */
+	public ScheduledToDoTask(ToDoTask inTask, Duration inDur) {
+		this(inTask.getName(), inTask.getCategory(), inDur);
+	}
 	
 	public ScheduledToDoTask(ObjectInputStream stream) throws ClassNotFoundException, IOException {
 		this.load(stream);

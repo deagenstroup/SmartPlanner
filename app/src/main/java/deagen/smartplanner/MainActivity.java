@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import deagen.smartplanner.fragments.ActivityPlannerFragment;
 import deagen.smartplanner.fragments.DailyPlannerFragment;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView view = (BottomNavigationView) findViewById(R.id.bottomNavigationView);
+        BottomNavigationView view = (BottomNavigationView) findViewById(R.id.mainactivity_navigation_view);
         view.setOnNavigationItemSelectedListener(this);
 
         dailyPlanner = new DailyPlannerFragment();
@@ -55,9 +56,32 @@ public class MainActivity extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
 
+        // adding the ActivityPlanner fragment and hiding it
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, dailyPlanner);
+        transaction.add(R.id.fragment_container, activityPlanner);
+        transaction.hide(activityPlanner);
+
+        // adding the statistics viewer fragment and hiding it
+        transaction.add(R.id.fragment_container, statsViewer);
+        transaction.hide(statsViewer);
+
+        // adding the DailyPlanner fragment and showing it
+        transaction.add(R.id.fragment_container, dailyPlanner);
+        transaction.show(dailyPlanner);
         transaction.commit();
+    }
+
+    public Fragment getVisibleFragment() {
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        if(fragments != null && !fragments.isEmpty()) {
+            for(Fragment fragment : fragments) {
+                if(fragment != null && fragment.isVisible()) {
+                    return fragment;
+                }
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -67,8 +91,31 @@ public class MainActivity extends AppCompatActivity
 
     public void switchFragments(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
+        if(this.getVisibleFragment() != null)
+            transaction.hide(this.getVisibleFragment());
+        transaction.show(fragment);
         transaction.commit();
+    }
+
+    public DailyPlannerFragment getDailyPlannerFragment() {
+        return dailyPlanner;
+    }
+
+    public void tapNavigationButton(int i) {
+        BottomNavigationView navView = findViewById(R.id.mainactivity_navigation_view);
+        switch(i) {
+            case 0:
+                navView.setSelectedItemId(R.id.dailyplanner_button);
+                break;
+
+            case 1:
+                navView.setSelectedItemId(R.id.activityplanner_button);
+                break;
+
+            case 2:
+                navView.setSelectedItemId(R.id.stats_button);
+                break;
+        }
     }
 
     public boolean onNavigationItemSelected(MenuItem item) {

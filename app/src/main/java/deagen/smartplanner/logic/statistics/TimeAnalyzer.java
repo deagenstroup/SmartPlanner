@@ -1,4 +1,4 @@
-package deagen.smartplanner.logic;
+package deagen.smartplanner.logic.statistics;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import deagen.smartplanner.logic.taskscheduling.ToDoList;
 public class TimeAnalyzer {
 	
 	/**
-	 * The ListCalendar which is being analyzed.
+	 * The object which stores the lists of completed tasks that are analyzed by the TimeAnalyzer.
 	 */
 	private ListCalendar calendar;
 	

@@ -188,7 +188,7 @@ public class DailyPlannerFragment extends Fragment {
             }
         });
 
-        ImageButton dateButton = (ImageButton) view.findViewById(R.id.date_button);
+        final ImageButton dateButton = (ImageButton) view.findViewById(R.id.date_button);
         LocalDate date = planner.getDate();
         ((TextView)view.findViewById(R.id.date_text)).setText("" + date.getMonthValue() + "/" + date.getDayOfMonth() + "/" + date.getYear());
         dateButton.setOnClickListener(new View.OnClickListener() {
@@ -223,13 +223,13 @@ public class DailyPlannerFragment extends Fragment {
                 if(planner.getTaskManager().isActive()) {
                     planner.getTaskManager().stopTasks();
                     startStopButton.setImageResource(android.R.drawable.ic_media_play);
-                    constraintLayout.addView(addButton);
+                    addButton.show();
                     ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(true);
                     setCurrentTaskHighlight(false);
                 } else {
                     planner.getTaskManager().startTasks(fragment);
                     startStopButton.setImageResource(android.R.drawable.ic_media_pause);
-                    constraintLayout.removeView(addButton);
+                    addButton.hide();
                     ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(false);
                     setCurrentTaskHighlight(true);
                 }
@@ -285,6 +285,11 @@ public class DailyPlannerFragment extends Fragment {
      * Displays a date picker dialog to the user and changes the date of the app accordingly
      */
     public void switchDates() {
+
+        // if the app is in active mode, do nothing
+        if(planner.getTaskManager().isActive())
+            return;
+
         // creating the listener which will change the date in the planner and update the UI accordingly
         DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
             @Override

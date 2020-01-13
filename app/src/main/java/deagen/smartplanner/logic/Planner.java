@@ -1,5 +1,6 @@
 package deagen.smartplanner.logic;
 
+import deagen.smartplanner.logic.statistics.TimeAnalyzer;
 import deagen.smartplanner.logic.taskplanning.ActivityCategory;
 import deagen.smartplanner.logic.taskplanning.ActivityPlanner;
 import deagen.smartplanner.logic.tasks.CompletedToDoTask;
@@ -220,11 +221,11 @@ public class Planner {
 	public void addTestValues() {
 		ToDoList list;
 		list = new ToDoList();
-		list.addScheduledTask(new ScheduledToDoTask("work on app", "programming", Duration.ofSeconds(5L)));
-		list.addScheduledTask(new ScheduledToDoTask("do python exercise", "programming", Duration.ofHours(2L)));
-		list.addScheduledTask(new ScheduledToDoTask("read Neuromancer", "reading", Duration.ofMinutes(60L)));
-		list.addCompletedTask(new CompletedToDoTask("read news article", "reading", Duration.ofMinutes(30L)));
-		list.addCompletedTask(new CompletedToDoTask("run", "exercise", Duration.ofHours(2L)));
+		list.addScheduledTask(new ScheduledToDoTask("study for Databases final", "schoolwork", Duration.ofSeconds(5L)));
+		list.addScheduledTask(new ScheduledToDoTask("go to the grocery store", "shopping", Duration.ofHours(2L)));
+		list.addScheduledTask(new ScheduledToDoTask("apply to internship", "job search", Duration.ofMinutes(60L)));
+		list.addCompletedTask(new CompletedToDoTask("cashed check", "misc", Duration.ofMinutes(30L)));
+		list.addCompletedTask(new CompletedToDoTask("study for Calc exam", "schoolwork", Duration.ofHours(2L)));
 		calendar.addToDoList(list, LocalDate.now());
 
 		list = new ToDoList();
@@ -254,16 +255,22 @@ public class Planner {
 //		list.addCompletedTask(new CompletedToDoTask("read Neuromancer", "reading", Duration.ofHours(2L)));
 //		calendar.addToDoList(list, LocalDate.of(2019, 8, 1));
 		
-		ActivityCategory cat = new ActivityCategory("programming");
-		cat.addToDoTask(new ToDoTask("work on app", "programming"));
+		ActivityCategory cat = new ActivityCategory("schoolwork");
+		cat.addToDoTask(new ToDoTask("do databases lab", "schoolwork"));
+		cat.addToDoTask(new ToDoTask("finish AI project", "schoolwork"));
+		cat.addToDoTask(new ToDoTask("study for OS final", "schoolwork"));
 		activityPlanner.addActivityCategory(cat);
 		
-		cat = new ActivityCategory("reading");
-		cat.addToDoTask(new ToDoTask("read Neuromancer", "reading"));
+		cat = new ActivityCategory("shopping");
+		cat.addToDoTask(new ToDoTask("buy headphones online", "shopping"));
+		cat.addToDoTask(new ToDoTask("go to the grocery store", "shopping"));
 		activityPlanner.addActivityCategory(cat);
 		
-		cat = new ActivityCategory("exercise");
-		cat.addToDoTask(new ToDoTask("run", "exercise"));
+		cat = new ActivityCategory("job search");
+		cat.addToDoTask(new ToDoTask("update resume", "job search"));
+		activityPlanner.addActivityCategory(cat);
+
+		cat = new ActivityCategory("misc");
 		activityPlanner.addActivityCategory(cat);
 	}
 	
