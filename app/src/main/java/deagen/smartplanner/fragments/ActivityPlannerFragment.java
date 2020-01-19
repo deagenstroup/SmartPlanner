@@ -272,8 +272,8 @@ public class ActivityPlannerFragment extends Fragment {
             public void onClick(View v) {
                 // unselecting the selected task and removing from the planner
                 TaskListAdapter adapter = ((TaskListAdapter)taskView.getAdapter());
-                adapter.unselectHolder();
                 getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
+                adapter.unselectHolder();
                 adapter.notifyDataSetChanged();
             }
         });

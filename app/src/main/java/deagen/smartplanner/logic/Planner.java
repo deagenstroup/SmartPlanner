@@ -94,9 +94,23 @@ public class Planner {
 	}
 
 	/**
+	 * Save the planner to the designated file
+	 */
+	public void save(ObjectOutputStream stream) {
+		try {
+			//ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(new File(fileName)));
+			calendar.save(stream);
+			activityPlanner.save(stream);
+			stream.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * Load a planner into the object from designate file
 	 */
-	private void load(String inFileName) throws FileNotFoundException {
+	public void load(String inFileName) throws FileNotFoundException {
 		fileName = inFileName;
 		try {
 			ObjectInputStream stream = new ObjectInputStream(new FileInputStream(new File(fileName)));
@@ -109,6 +123,19 @@ public class Planner {
 		}
 	}
 
+	/**
+	 * Load a planner into the object from designate file
+	 */
+	public void load(ObjectInputStream stream) throws FileNotFoundException {
+		try {
+			calendar = new ListCalendar(stream);
+			activityPlanner = new ActivityPlanner(stream);
+		} catch(FileNotFoundException e) {
+			throw(e);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 
 	// accessors

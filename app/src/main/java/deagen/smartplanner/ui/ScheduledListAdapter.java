@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import deagen.smartplanner.MainActivity;
 import deagen.smartplanner.R;
 import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.Planner;
@@ -53,6 +54,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             @Override
             public void onClick(View view) {
                 dailyFragment.changeTaskName(planner.getScheduledTask(holderPosition));
+                ((MainActivity)dailyFragment.getActivity()).saveToFile();
                 Log.d("CLICK DEBUG", "You have clicked the task text");
             }
         });
@@ -60,6 +62,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
            @Override
            public void onClick(View view) {
                dailyFragment.changeTaskCategory(planner.getScheduledTask(holderPosition));
+               ((MainActivity)dailyFragment.getActivity()).saveToFile();
                Log.d("CLICK DEBUG", "You have clicked the category text");
            }
         });
@@ -67,6 +70,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             @Override
             public void onClick(View v) {
                 dailyFragment.changeTaskTime(planner.getScheduledTask(holderPosition));
+                ((MainActivity)dailyFragment.getActivity()).saveToFile();
                 Log.d("CLICK DEBUG", "You have clicked the time text");
             }
         });
@@ -89,6 +93,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
     public void moveItem(int fromPos, int toPos) {
         // move the selected task to this position
         planner.moveScheduledTask(fromPos, toPos);
+        ((MainActivity)fragment.getActivity()).saveToFile();
     }
 
     public void deleteCurrentItem() {

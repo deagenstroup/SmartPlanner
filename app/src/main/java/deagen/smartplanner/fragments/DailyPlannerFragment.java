@@ -37,6 +37,7 @@ import android.widget.TimePicker;
 import java.time.Duration;
 import java.time.LocalDate;
 
+import deagen.smartplanner.MainActivity;
 import deagen.smartplanner.ui.CompletedListAdapter;
 import deagen.smartplanner.R;
 import deagen.smartplanner.ui.ScheduledListAdapter;
@@ -100,8 +101,6 @@ public class DailyPlannerFragment extends Fragment {
      */
     private ImageButton startStopButton;
 
-    private OnFragmentInteractionListener mListener;
-
     /**
      * Receiver to receive update UI messages from the TaskManagerService background service.
      */
@@ -153,27 +152,36 @@ public class DailyPlannerFragment extends Fragment {
         };
     }
 
+    /**
+     * Method where all of the GUI objects are initialized, including definitions of handler methods
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@org.jetbrains.annotations.NotNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_dailyplanner, container, false);
 
         constraintLayout = view.findViewById(R.id.dailyplanner_layout);
 
-        scheduledListView = (RecyclerView) view.findViewById(R.id.scheduled_view);
+        // building the container for the list of scheduled tasks
+        scheduledListView = view.findViewById(R.id.scheduled_view);
         scheduledListView.setHasFixedSize(true);
         scheduledListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         scheduledListView.setAdapter(new ScheduledListAdapter(planner, this));
 
+        // building the container for the list of completed tasks
         completedListView = new RecyclerView(view.findViewById(R.id.list_container).getContext());
         completedListView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         completedListView.setHasFixedSize(true);
         completedListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         completedListView.setAdapter(new CompletedListAdapter(planner, this));
 
-        TabLayout tabLayout = view.findViewById(R.id.tabLayout);
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        // initializing tab buttons for completed and scheduled list containers
+        ((TabLayout)view.findViewById(R.id.tabLayout)).addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switchTabs();
@@ -188,16 +196,19 @@ public class DailyPlannerFragment extends Fragment {
             }
         });
 
-        final ImageButton dateButton = (ImageButton) view.findViewById(R.id.date_button);
+        // initializing the date displaying text to today's date
         LocalDate date = planner.getDate();
         ((TextView)view.findViewById(R.id.date_text)).setText("" + date.getMonthValue() + "/" + date.getDayOfMonth() + "/" + date.getYear());
-        dateButton.setOnClickListener(new View.OnClickListener() {
+
+        // adding a handler to the calendar button at the top right
+        (view.findViewById(R.id.date_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switchDates();
             }
         });
 
+        // adding the handler for "add a new task" button on the bottom right
         addButton = view.findViewById(R.id.dailyplanner_add_button);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,33 +217,23 @@ public class DailyPlannerFragment extends Fragment {
             }
         });
 
+        // adding a handler for the "delete a task" button in the bottom right, and initializing
+        // it to be invisible
         deleteButton = view.findViewById(R.id.dailyplanner_delete_button);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((ScheduledListAdapter)scheduledListView.getAdapter()).deleteCurrentItem();
+                ((MainActivity)getActivity()).saveToFile();
             }
         });
         setDeleteButtonVisible(false);
 
-        final DailyPlannerFragment fragment = this;
         startStopButton = view.findViewById(R.id.start_stop_button);
         startStopButton.setOnClickListener(new ImageButton.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(planner.getTaskManager().isActive()) {
-                    planner.getTaskManager().stopTasks();
-                    startStopButton.setImageResource(android.R.drawable.ic_media_play);
-                    addButton.show();
-                    ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(true);
-                    setCurrentTaskHighlight(false);
-                } else {
-                    planner.getTaskManager().startTasks(fragment);
-                    startStopButton.setImageResource(android.R.drawable.ic_media_pause);
-                    addButton.hide();
-                    ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(false);
-                    setCurrentTaskHighlight(true);
-                }
+                toggleActiveMode();
             }
         });
 
@@ -247,7 +248,7 @@ public class DailyPlannerFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+//            mListener = (OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -257,7 +258,7 @@ public class DailyPlannerFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+//        mListener = null;
     }
 
 
@@ -333,6 +334,26 @@ public class DailyPlannerFragment extends Fragment {
     }
 
     /**
+     * Switches the application in and out of active tracking mode.
+     */
+    public void toggleActiveMode() {
+        ((MainActivity)getActivity()).saveToFile();
+        if(planner.getTaskManager().isActive()) {
+            planner.getTaskManager().stopTasks();
+            startStopButton.setImageResource(android.R.drawable.ic_media_play);
+            addButton.show();
+            ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(true);
+            setCurrentTaskHighlight(false);
+        } else {
+            planner.getTaskManager().startTasks(this);
+            startStopButton.setImageResource(android.R.drawable.ic_media_pause);
+            addButton.hide();
+            ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(false);
+            setCurrentTaskHighlight(true);
+        }
+    }
+
+    /**
      * Sets whether the delete button is visible on screen or not.
      * @param visible If true, delete button is visible, otherwise it is hidden.
      */
@@ -396,6 +417,7 @@ public class DailyPlannerFragment extends Fragment {
                 inTask.setName(input.getText().toString());
                 scheduledListView.getAdapter().notifyDataSetChanged();
                 ((ScheduledListAdapter)scheduledListView.getAdapter()).unselectHolder();
+                ((MainActivity)getActivity()).saveToFile();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
@@ -438,6 +460,7 @@ public class DailyPlannerFragment extends Fragment {
                 inTask.setCategory(spinner.getSelectedItem().toString());
                 scheduledListView.getAdapter().notifyDataSetChanged();
                 ((ScheduledListAdapter)scheduledListView.getAdapter()).unselectHolder();
+                ((MainActivity)getActivity()).saveToFile();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
@@ -464,6 +487,7 @@ public class DailyPlannerFragment extends Fragment {
                 inTask.setAllocatedTime(Duration.ofMinutes(minute + hourOfDay*60));
                 scheduledListView.getAdapter().notifyDataSetChanged();
                 ((ScheduledListAdapter)scheduledListView.getAdapter()).unselectHolder();
+                ((MainActivity)getActivity()).saveToFile();
             }
         };
         TimePickerDialog timePickerDialog = new TimePickerDialog(this.getContext(), listener,
@@ -484,11 +508,4 @@ public class DailyPlannerFragment extends Fragment {
         planner.addTask(task);
         scheduledListView.getAdapter().notifyDataSetChanged();
     }
-
-//    // TODO: Rename method, update argument and hook method into UI event
-//    public void onButtonPressed(Uri uri) {
-//        if (mListener != null) {
-//            mListener.onFragmentInteraction(uri);
-//        }
-//    }
 }

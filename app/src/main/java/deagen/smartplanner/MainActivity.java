@@ -1,5 +1,6 @@
 package deagen.smartplanner;
 
+import android.content.Context;
 import android.net.Uri;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,6 +32,11 @@ public class MainActivity extends AppCompatActivity
                     ActivityPlannerFragment.OnFragmentInteractionListener,
                     StatisticsFragment.OnFragmentInteractionListener,
                     BottomNavigationView.OnNavigationItemSelectedListener {
+
+    /**
+     * The filename used to save the data of the planner
+     */
+    private static String mainFileName = "plannerfile.dat";
 
     private Toolbar toolbar;
     private DailyPlannerFragment dailyPlanner;
@@ -47,7 +58,8 @@ public class MainActivity extends AppCompatActivity
         statsViewer = StatisticsFragment.newInstance(null, null);
 
         planner = new Planner();
-        planner.addTestValues();
+        this.loadFromFile();
+//        planner.addTestValues();
         planner.selectDate(LocalDate.now());
 
         dailyPlanner.setPlanner(planner);
@@ -71,6 +83,13 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
+    //fragment manipulation methods
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
     public Fragment getVisibleFragment() {
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
         if(fragments != null && !fragments.isEmpty()) {
@@ -82,11 +101,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         return null;
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
     }
 
     public void switchFragments(Fragment fragment) {
@@ -101,6 +115,13 @@ public class MainActivity extends AppCompatActivity
         return dailyPlanner;
     }
 
+    //navigation button methods
+
+    /**
+     * Emulates the user taping the navigation buttons at the bottom of the screen to switch
+     * between the DailyPlanner, ActivityPlanner, and StatisticsViewer fragments.
+     * @param i Number to indicate which button is being pressed, starting with 0
+     */
     public void tapNavigationButton(int i) {
         BottomNavigationView navView = findViewById(R.id.mainactivity_navigation_view);
         switch(i) {
@@ -136,6 +157,8 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    //back button methods
+
     @Override
     public void onBackPressed() {
         if(backKeyListener != null) {
@@ -152,5 +175,33 @@ public class MainActivity extends AppCompatActivity
 
     public interface BackKeyListener {
         void onBackKeyPressed();
+    }
+
+    //file I/O methods
+
+    public void saveToFile() {
+        try {
+            ObjectOutputStream stream =
+                    new ObjectOutputStream(getApplicationContext().openFileOutput(mainFileName, Context.MODE_PRIVATE));
+            planner.save(stream);
+            Log.d("debug", "file saved successfully");
+        } catch(FileNotFoundException exp) {
+            Log.d("I/O Exception", "FileNotFound while saving");
+        } catch(IOException exp) {
+            Log.d("I/O Exception", "IOException while saving");
+        }
+    }
+
+    public void loadFromFile() {
+        try {
+            ObjectInputStream stream =
+                    new ObjectInputStream(getApplicationContext().openFileInput(mainFileName));
+            planner.load(stream);
+            Log.d("debug", "file loaded successfully");
+        } catch(FileNotFoundException exp) {
+            Log.d("I/O Exception", "FileNotFound while loading");
+        } catch(IOException exp) {
+            Log.d("I/O Exception", "IOException while loading");
+        }
     }
 }
