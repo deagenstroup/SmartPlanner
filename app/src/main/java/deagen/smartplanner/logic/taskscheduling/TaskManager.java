@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -14,11 +15,11 @@ import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 import deagen.smartplanner.service.TaskManagerService;
 
 /**
- * Actively manages a ToDoList in real time. TaskManager can be put into an active mode where it periodically
- * increases the amount of time spent on the current task and moves onto the next task if
- * the full time has been spent. TaskManager can also extend and cut short the time allocated for
+ * Handles logic of actively managing tasks. TaskManager can be put into an active mode where it periodically
+ * increases the amount of time spent on the current task and pauses if the full time has been
+ * spent to wait for user input. TaskManager can also extend and cut short the time allocated for
  * the current task. TaskManager is designed to provide real-time accountability and tracking
- * to the user for the ToDoList they have created seperate of the user interface.
+ * to the user for the ToDoList they have created separate of the user interface.
  * @author Deagen Stroup
  */
 public class TaskManager {
@@ -34,7 +35,7 @@ public class TaskManager {
 	private ToDoList list;
 	
 	/**
-	 * The time which the current activity is projected to end if the
+	 * The time at which the current activity is projected to end if the
 	 * module is in active mode;
 	 */
 	private LocalTime currentActivityEnd;
@@ -45,6 +46,8 @@ public class TaskManager {
 	 * on the current activity.
 	 */
 	private boolean active;
+
+	private DailyPlannerFragment fragment;
 	
 	public TaskManager() {
 		list = null;
@@ -62,6 +65,8 @@ public class TaskManager {
 	 * @return The task which is currently being worked on by the user.
 	 */
 	public ScheduledToDoTask getCurrentTask() {
+		if(list == null)
+			return null;
 		return list.getCurrentTask();
 	}
 
@@ -73,7 +78,8 @@ public class TaskManager {
 	}
 
 	public void setToDoList(ToDoList inList) {
-		list = inList;
+		if(!active)
+			list = inList;
 	}
 	
 	/**
@@ -99,17 +105,19 @@ public class TaskManager {
 	 */
 	public void spendTimeOnCurrentTask(Duration timeSpent) {
 		this.getCurrentTask().spendTime(timeSpent);
-		service.updateCurrentTask();
-		// update Service Interface
-		// update FragmentInterface if nessesarry
+
+		// if the current task is finished,
 		if(this.getCurrentTask().isFinished()) {
-			service.preEndTaskUpdate();
-			list.finishCurrentTask();
-			service.postEndTaskUpdate();
-			if(list.getNumberOfScheduledTasks() == 0 && this.active == true) {
-				this.stopTasks();
-			}
+			// stop the task manager
+			this.stopTasks();
+
+			// notify service that task has finished
+			service.currentTaskFinish();
 		}
+	}
+
+	public void finishTask() {
+		list.finishCurrentTask();
 	}
 
 //	public void checkCurrentTask() {
@@ -126,10 +134,16 @@ public class TaskManager {
 	/**
 	 * Puts the planner into an active state, in which the current task being executed. And the
 	 * current ToDoList is actively being managed.
+	 * @return True if it was successful, false otherwise
 	 */
-	public void startTasks(DailyPlannerFragment fragment) {
+	public boolean startTasks(DailyPlannerFragment inFragment) {
+		ScheduledToDoTask task = this.getCurrentTask();
+		if(task == null) {
+			Log.d("ERROR", "current task is null");
+			return false;
+		}
 		active = true;
-//		userInterface = fragment;
+		fragment = inFragment;
 		currentActivityEnd = LocalTime.now().plus(this.getCurrentTask().getTimeRemaining());
 		Context context = fragment.getContext();
 		Intent intent = new Intent(context, TaskManagerService.class);
@@ -147,10 +161,12 @@ public class TaskManager {
 			}
 		};
 		context.bindService(intent, connection, 0);
+		return true;
 	}
 
 	public void stopTasks() {
 		active = false;
+		fragment = null;
 	}
 
 	// stub code to be removed later, used for text-based implementation that is to be removed

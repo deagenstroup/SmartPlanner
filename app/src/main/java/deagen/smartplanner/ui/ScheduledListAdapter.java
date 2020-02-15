@@ -13,6 +13,9 @@ import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.Planner;
 import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 
+/**
+ * A container for a list of tasks that have been scheduled into a day within the DailyPlanner
+ */
 public class ScheduledListAdapter extends SelectionListAdapter {
 
     public static class ScheduledHolder extends SelectionHolder {

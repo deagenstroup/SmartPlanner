@@ -70,6 +70,8 @@ public class ToDoList {
 	 * @return The first task on the list, being worked on currently or to be worked on first
 	 */
 	public ScheduledToDoTask getCurrentTask() {
+		if(this.getScheduledTasks() == null || this.getScheduledTasks().isEmpty())
+			return null;
 		return this.getScheduledTasks().get(0);
 	}
 	

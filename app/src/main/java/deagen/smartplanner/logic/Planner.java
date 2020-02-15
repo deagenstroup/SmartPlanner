@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.Date;
 
 /**
  * A wrapper class for interfacing the core functionality of the planner application.
@@ -224,8 +225,10 @@ public class Planner {
 	 * @param task The task to be added to the selected ToDoList
 	 */
 	public void addTask(ScheduledToDoTask task) {
-		if(!this.selectedToDoListExists())
+		if(!this.selectedToDoListExists()) {
 			calendar.addToDoList(new ToDoList(), selectedDate);
+			taskManager.setToDoList(this.getSelectedToDoList());
+		}
 		this.getSelectedToDoList().addTask(task);
 	}
 	
@@ -246,59 +249,61 @@ public class Planner {
 	 * Used to add stub values to the Planner for testing purposes.
 	 */
 	public void addTestValues() {
-		ToDoList list;
-		list = new ToDoList();
-		list.addScheduledTask(new ScheduledToDoTask("study for Databases final", "schoolwork", Duration.ofSeconds(5L)));
-		list.addScheduledTask(new ScheduledToDoTask("go to the grocery store", "shopping", Duration.ofHours(2L)));
-		list.addScheduledTask(new ScheduledToDoTask("apply to internship", "job search", Duration.ofMinutes(60L)));
-		list.addCompletedTask(new CompletedToDoTask("cashed check", "misc", Duration.ofMinutes(30L)));
-		list.addCompletedTask(new CompletedToDoTask("study for Calc exam", "schoolwork", Duration.ofHours(2L)));
-		calendar.addToDoList(list, LocalDate.now());
-
-		list = new ToDoList();
-		list.addCompletedTask(new CompletedToDoTask("skateboard", "exercise", Duration.ofHours(2L)));
-		list.addCompletedTask(new CompletedToDoTask("work on app", "programming", Duration.ofHours(2L)));
-		calendar.addToDoList(list, LocalDate.of(2019, 8, 14));
+		calendar.getToDoList(LocalDate.of(2020, 1, 16)).addScheduledTask(
+				new ScheduledToDoTask("nothing", "misc", Duration.ofSeconds(5L)));
+//		ToDoList list;
+//		list = new ToDoList();
+//		list.addScheduledTask(new ScheduledToDoTask("study for Databases final", "schoolwork", Duration.ofSeconds(5L)));
+//		list.addScheduledTask(new ScheduledToDoTask("go to the grocery store", "shopping", Duration.ofHours(2L)));
+//		list.addScheduledTask(new ScheduledToDoTask("apply to internship", "job search", Duration.ofMinutes(60L)));
+//		list.addCompletedTask(new CompletedToDoTask("cashed check", "misc", Duration.ofMinutes(30L)));
+//		list.addCompletedTask(new CompletedToDoTask("study for Calc exam", "schoolwork", Duration.ofHours(2L)));
+//		calendar.addToDoList(list, LocalDate.now());
 //
 //		list = new ToDoList();
-//		list.addCompletedTask(new CompletedToDoTask("do python exercise", "programming", Duration.ofHours(2L)));
-//		list.addCompletedTask(new CompletedToDoTask("read news article", "reading", Duration.ofMinutes(30L)));
-//		calendar.addToDoList(list, LocalDate.of(2019, 8, 4));
-//
-//		list = new ToDoList();
-//		list.addCompletedTask(new CompletedToDoTask("work on app", "programming", Duration.ofHours(3L)));
 //		list.addCompletedTask(new CompletedToDoTask("skateboard", "exercise", Duration.ofHours(2L)));
-//		list.addCompletedTask(new CompletedToDoTask("read Neuromancer", "reading", Duration.ofMinutes(60L)));
-//		calendar.addToDoList(list, LocalDate.of(2019, 8, 3));
+//		list.addCompletedTask(new CompletedToDoTask("work on app", "programming", Duration.ofHours(2L)));
+//		calendar.addToDoList(list, LocalDate.of(2019, 8, 14));
+////
+////		list = new ToDoList();
+////		list.addCompletedTask(new CompletedToDoTask("do python exercise", "programming", Duration.ofHours(2L)));
+////		list.addCompletedTask(new CompletedToDoTask("read news article", "reading", Duration.ofMinutes(30L)));
+////		calendar.addToDoList(list, LocalDate.of(2019, 8, 4));
+////
+////		list = new ToDoList();
+////		list.addCompletedTask(new CompletedToDoTask("work on app", "programming", Duration.ofHours(3L)));
+////		list.addCompletedTask(new CompletedToDoTask("skateboard", "exercise", Duration.ofHours(2L)));
+////		list.addCompletedTask(new CompletedToDoTask("read Neuromancer", "reading", Duration.ofMinutes(60L)));
+////		calendar.addToDoList(list, LocalDate.of(2019, 8, 3));
+////
+////		list = new ToDoList();
+////		list.addCompletedTask(new CompletedToDoTask("work on app", "programming", Duration.ofHours(5L)));
+////		list.addCompletedTask(new CompletedToDoTask("run", "exercise", Duration.ofHours(2L)));
+////		calendar.addToDoList(list, LocalDate.of(2019, 8, 2));
+////
+////		list = new ToDoList();
+////		list.addCompletedTask(new CompletedToDoTask("do programming exercise", "programming", Duration.ofHours(1L)));
+////		list.addCompletedTask(new CompletedToDoTask("run", "exercise", Duration.ofHours(2L)));
+////		list.addCompletedTask(new CompletedToDoTask("read Neuromancer", "reading", Duration.ofHours(2L)));
+////		calendar.addToDoList(list, LocalDate.of(2019, 8, 1));
 //
-//		list = new ToDoList();
-//		list.addCompletedTask(new CompletedToDoTask("work on app", "programming", Duration.ofHours(5L)));
-//		list.addCompletedTask(new CompletedToDoTask("run", "exercise", Duration.ofHours(2L)));
-//		calendar.addToDoList(list, LocalDate.of(2019, 8, 2));
+//		ActivityCategory cat = new ActivityCategory("schoolwork");
+//		cat.addToDoTask(new ToDoTask("do databases lab", "schoolwork"));
+//		cat.addToDoTask(new ToDoTask("finish AI project", "schoolwork"));
+//		cat.addToDoTask(new ToDoTask("study for OS final", "schoolwork"));
+//		activityPlanner.addActivityCategory(cat);
 //
-//		list = new ToDoList();
-//		list.addCompletedTask(new CompletedToDoTask("do programming exercise", "programming", Duration.ofHours(1L)));
-//		list.addCompletedTask(new CompletedToDoTask("run", "exercise", Duration.ofHours(2L)));
-//		list.addCompletedTask(new CompletedToDoTask("read Neuromancer", "reading", Duration.ofHours(2L)));
-//		calendar.addToDoList(list, LocalDate.of(2019, 8, 1));
-		
-		ActivityCategory cat = new ActivityCategory("schoolwork");
-		cat.addToDoTask(new ToDoTask("do databases lab", "schoolwork"));
-		cat.addToDoTask(new ToDoTask("finish AI project", "schoolwork"));
-		cat.addToDoTask(new ToDoTask("study for OS final", "schoolwork"));
-		activityPlanner.addActivityCategory(cat);
-		
-		cat = new ActivityCategory("shopping");
-		cat.addToDoTask(new ToDoTask("buy headphones online", "shopping"));
-		cat.addToDoTask(new ToDoTask("go to the grocery store", "shopping"));
-		activityPlanner.addActivityCategory(cat);
-		
-		cat = new ActivityCategory("job search");
-		cat.addToDoTask(new ToDoTask("update resume", "job search"));
-		activityPlanner.addActivityCategory(cat);
-
-		cat = new ActivityCategory("misc");
-		activityPlanner.addActivityCategory(cat);
+//		cat = new ActivityCategory("shopping");
+//		cat.addToDoTask(new ToDoTask("buy headphones online", "shopping"));
+//		cat.addToDoTask(new ToDoTask("go to the grocery store", "shopping"));
+//		activityPlanner.addActivityCategory(cat);
+//
+//		cat = new ActivityCategory("job search");
+//		cat.addToDoTask(new ToDoTask("update resume", "job search"));
+//		activityPlanner.addActivityCategory(cat);
+//
+//		cat = new ActivityCategory("misc");
+//		activityPlanner.addActivityCategory(cat);
 	}
 	
 }

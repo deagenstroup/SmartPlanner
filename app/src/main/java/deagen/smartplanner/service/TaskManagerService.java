@@ -33,7 +33,8 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
     public static final String UPDATE_UI = "TaskManagerService.UPDATE_UI",
                                UPDATE = "TaskManagerService.UPDATE",
                                PRE_UPDATE = "TaskManagerService.PRE_UPDATE",
-                               POST_UPDATE = "TaskManagerService.POST_UPDATE";
+                               POST_UPDATE = "TaskManagerService.POST_UPDATE",
+                               END_TASK = "TaskMangerService.END_TASK";
 
 
     /**
@@ -103,11 +104,14 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
                     e.printStackTrace();
                 }
             }
+
+            // starting the active mode of the task manager
             this.createCurrentTaskNotification();
             do {
                 taskManager.spendTimeOnCurrentTask(Duration.ofSeconds(1));
-                ScheduledToDoTask task = taskManager.getCurrentTask();
-                Log.d("TESTING", "Current Task: " + task.getName() + " time: " + task.getTimeRemainingString());
+                this.updateCurrentTask();
+//                ScheduledToDoTask task = taskManager.getCurrentTask();
+//                Log.d("TESTING", "Current Task: " + task.getName() + " time: " + task.getTimeRemainingString());
                 try {
                     Thread.sleep(1000);
                 } catch(InterruptedException e) {
@@ -117,6 +121,10 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         }
     }
 
+    /**
+     * Creates the notification which informs the user of the task being worked on and the time
+     * spent on that task.
+     */
     public void createCurrentTaskNotification() {
         notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder = new NotificationCompat.Builder(this);
@@ -160,14 +168,25 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
     }
 
     /**
-     *
+     * Updates the current task notification and relevent DailyPlannerFragment GUI objects to
+     * reflect the task that is currently being worked on.
      */
     public void updateCurrentTask() {
+        // getting the current task and sending the text to the current task notification
         ScheduledToDoTask task = taskManager.getCurrentTask();
         String notificationText = task.getName() + " - " + task.getTimeRemainingString();
         notificationBuilder.setContentText(notificationText);
         notificationManager.notify(1, notificationBuilder.build());
         this.sendUpdateMessage(UPDATE);
+    }
+
+    /**
+     * Sends broadcast back to DailyPlannerFragment indicating that decision needs to be made to
+     * finish the current task.
+     */
+    public void currentTaskFinish() {
+        this.preEndTaskUpdate();
+        this.sendUpdateMessage(END_TASK);
     }
 
     public void preEndTaskUpdate() {

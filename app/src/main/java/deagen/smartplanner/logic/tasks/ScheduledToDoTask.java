@@ -60,9 +60,7 @@ public class ScheduledToDoTask extends ToDoTask {
 	}
 
 	public void allocateMoreTime(Duration inTime) {
-		Duration newTime = allocatedTime.minus(this.getTimeRemaining());
-		newTime.plus(inTime);
-		allocatedTime = newTime;
+		allocatedTime = timeSpent.plus(inTime);
 	}
 	
 	public boolean isFinished() {

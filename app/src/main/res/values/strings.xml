@@ -17,6 +17,6 @@
     <string name="dailyplanner_title">Daily Planner</string>
     <string name="activityplanner_title">Activity Planner</string>
     <string name="statisticsviewer_title">Statistics Viewer</string>
-    <string name="task_categories_title">Task Categories</string>
+    <string name="task_categories_title">To-Do Lists</string>
     <string name="category_text">*category*</string>
 </resources>

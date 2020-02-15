@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity
 
         planner = new Planner();
         this.loadFromFile();
-//        planner.addTestValues();
+        planner.addTestValues();
         planner.selectDate(LocalDate.now());
 
         dailyPlanner.setPlanner(planner);
