@@ -8,11 +8,14 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.time.Duration;
-import java.time.LocalTime;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 
+import deagen.smartplanner.MainActivity;
 import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 import deagen.smartplanner.service.TaskManagerService;
+
 
 /**
  * Handles logic of actively managing tasks. TaskManager can be put into an active mode where it periodically
@@ -24,6 +27,8 @@ import deagen.smartplanner.service.TaskManagerService;
  */
 public class TaskManager {
 
+	private static final boolean OLD_LOAD_FLAG = false;
+
 	/**
 	 * The Service which is used to run TaskManager's functionality in the background.
 	 */
@@ -34,11 +39,11 @@ public class TaskManager {
 	 */
 	private ToDoList list;
 	
-	/**
-	 * The time at which the current activity is projected to end if the
-	 * module is in active mode;
-	 */
-	private LocalTime currentActivityEnd;
+//	/**
+//	 * The time at which the current activity is projected to end if the
+//	 * module is in active mode;
+//	 */
+//	private LocalTime currentActivityEnd;
 	
 	/**
 	 * If true, then the tasks of ToDoList are actively being completed
@@ -47,18 +52,38 @@ public class TaskManager {
 	 */
 	private boolean active;
 
+	/**
+	 * The time since the current task was made active or amount of time since the current task was
+	 * last logged, in milliseconds from epoch.
+	 */
+	private long startTimeMilli = 0L;
+
 	private DailyPlannerFragment fragment;
 	
-	public TaskManager() {
-		list = null;
-	}
+//	public TaskManager() {
+//		list = null;
+//	}
 	
 	public TaskManager(ToDoList inList) {
 		this.setToDoList(inList);
 	}
 
+	public TaskManager(ToDoList inList, ObjectInputStream stream) {
+		this(inList);
+		if(!OLD_LOAD_FLAG)
+			this.load(stream);
+	}
+
+	public void setDailyPlannerFragment(DailyPlannerFragment inFragment) {
+		fragment = inFragment;
+	}
+
 	public boolean isActive() {
 		return active;
+	}
+
+	public long getStartTime() {
+		return startTimeMilli;
 	}
 
 	/**
@@ -70,32 +95,28 @@ public class TaskManager {
 		return list.getCurrentTask();
 	}
 
-	/**
-	 * @return The time at which the current activity was started.
-	 */
-	public LocalTime getCurrentActivityEnd() {
-		return currentActivityEnd;
-	}
+//	/**
+//	 * @return The time at which the current activity was started.
+//	 */
+//	public LocalTime getCurrentActivityEnd() {
+//		return currentActivityEnd;
+//	}
 
 	public void setToDoList(ToDoList inList) {
 		if(!active)
 			list = inList;
 	}
-	
+
+
+
 	/**
-	 * Extends the amount of time allocated for the task currently being completed
-	 * @param timeExtension The amount of time by which the current task is to be extended
+	 * Calculates the amount of time that has passed since the TaskManager was put into active mode
+	 * and saves it into the current task object.
 	 */
-	public void extendCurrentActivity(Duration timeExtension) {
-		this.getCurrentTask().extendTime(timeExtension);
-	}
-	
-	/**
-	 * Cuts short the amount of time allocated for the task currently being completed
-	 * @param timeCut The amount of time by which the current task is to be cut short
-	 */
-	public void cutShortCurrentActivity(Duration timeCut) {
-		this.getCurrentTask().cutShortTime(timeCut);
+	public void logTimeOnCurrentTask() {
+		long timeDifference = System.currentTimeMillis() - startTimeMilli;
+		startTimeMilli = System.currentTimeMillis();
+		this.spendTimeOnCurrentTask(Duration.ofMillis(timeDifference));
 	}
 
 	/**
@@ -119,20 +140,9 @@ public class TaskManager {
 	public void finishTask() {
 		list.finishCurrentTask();
 	}
-
-//	public void checkCurrentTask() {
-//		if(this.getCurrentTask().isFinished()) {
-//			userInterface.preEndTaskUpdate();
-//			list.finishCurrentTask();
-//			userInterface.postEndTaskUpdate();
-//			if(list.getNumberOfScheduledTasks() == 0 && this.active == true) {
-//				this.active = false;
-//			}
-//		}
-//	}
 	
 	/**
-	 * Puts the planner into an active state, in which the current task being executed. And the
+	 * Puts the planner into an active state, in which the current task is being executed. And the
 	 * current ToDoList is actively being managed.
 	 * @return True if it was successful, false otherwise
 	 */
@@ -143,8 +153,45 @@ public class TaskManager {
 			return false;
 		}
 		active = true;
+		startTimeMilli = System.currentTimeMillis();
 		fragment = inFragment;
-		currentActivityEnd = LocalTime.now().plus(this.getCurrentTask().getTimeRemaining());
+//		currentActivityEnd = LocalTime.now().plus(this.getCurrentTask().getTimeRemaining());
+
+		startTaskManagerService();
+
+		return true;
+	}
+
+	public void stopTasks() {
+		Context context = fragment.getContext();
+		context.stopService(new Intent(context, TaskManagerService.class));
+		Log.d("DEBUG", "TaskManager service has stopped");
+		active = false;
+		fragment = null;
+		this.saveToFile();
+	}
+
+	/**
+	 * Similar to startTasks method, except this is called when it is assumed that the TaskManager
+	 * has been built from a save file that did not properly exit and has unaccounted time.
+	 * @param inFragment The DailyPlannerFragment which called this method.
+	 * @return True if completed successfully, false otherwise.
+	 */
+	public boolean restartTasks(DailyPlannerFragment inFragment) {
+		ScheduledToDoTask task = this.getCurrentTask();
+		if(task == null) {
+			Log.d("ERROR", "current task is null");
+			return false;
+		}
+		fragment = inFragment;
+
+		startTaskManagerService();
+
+		return true;
+	}
+
+	private void startTaskManagerService() {
+		// starting the background service to notify the user
 		Context context = fragment.getContext();
 		Intent intent = new Intent(context, TaskManagerService.class);
 		context.startService(new Intent(context, TaskManagerService.class));
@@ -157,22 +204,84 @@ public class TaskManager {
 			}
 			@Override
 			public void onServiceDisconnected(ComponentName className) {
-
+//				Log.d("DEBUG", "TaskManager service has been disconnected.");
 			}
 		};
 		context.bindService(intent, connection, 0);
-		return true;
 	}
 
-	public void stopTasks() {
-		active = false;
-		fragment = null;
+	/**
+	 * Analyzes the startTime and activity status just after being loaded from file to determine
+	 * if the TaskManager or TaskManager service had been stopped in the middle of active status.
+	 * @return True if the TaskManager or TaskManager service had been stopped abruptly, false otherwise.
+	 */
+	public boolean checkForAbruptExit() {
+		if(active && startTimeMilli < System.currentTimeMillis()) {
+			long currentTime = System.currentTimeMillis();
+			if (this.isActive() && (currentTime - this.getStartTime()) <= Duration.ofHours(3L).toMillis()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	// stub code to be removed later, used for text-based implementation that is to be removed
-	public void startTasks() {
-
+	public void stopService() {
+		service.setStopFlag(true);
 	}
+
+	public void saveToFile() {
+		if (fragment != null) {
+			MainActivity mainActivity = (MainActivity) fragment.getActivity();
+			mainActivity.saveToFile();
+		}
+	}
+
+	public void save(ObjectOutputStream stream) {
+		try {
+			stream.writeBoolean(active);
+			stream.writeLong(startTimeMilli);
+			Log.d("Debug", "TaskManager saved successfully.");
+		} catch(java.io.IOException exception) {
+			Log.e("TaskManager", "IOException: Error writing TaskManager to file.");
+		}
+	}
+
+	public void load(ObjectInputStream stream) {
+		try {
+			active = stream.readBoolean();
+			startTimeMilli = stream.readLong();
+			Log.d("Debug", "TaskManager loaded successfully.");
+		} catch(java.io.IOException exception) {
+			Log.e("TaskManager", "IOException: Error reading TaskManager from file.");
+		}
+	}
+
+	/**
+	 * Extends the amount of time allocated for the task currently being completed
+	 * @param timeExtension The amount of time by which the current task is to be extended
+	 */
+	public void extendCurrentActivity(Duration timeExtension) {
+		this.getCurrentTask().extendTime(timeExtension);
+	}
+
+	/**
+	 * Cuts short the amount of time allocated for the task currently being completed
+	 * @param timeCut The amount of time by which the current task is to be cut short
+	 */
+	public void cutShortCurrentActivity(Duration timeCut) {
+		this.getCurrentTask().cutShortTime(timeCut);
+	}
+
+	//	public void checkCurrentTask() {
+//		if(this.getCurrentTask().isFinished()) {
+//			userInterface.preEndTaskUpdate();
+//			list.finishCurrentTask();
+//			userInterface.postEndTaskUpdate();
+//			if(list.getNumberOfScheduledTasks() == 0 && this.active == true) {
+//				this.active = false;
+//			}
+//		}
+//	}
 
 //	// Obsulete code which uses AsyncTask implementation
 //	// new implementation uses background service

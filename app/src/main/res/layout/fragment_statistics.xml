@@ -2,21 +2,104 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout3"
+    android:id="@+id/statistics-viewer-layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.StatisticsFragment">
+    tools:context=".fragments.StatisticsFragment" >
 
-    <!-- TODO: Update blank fragment layout -->
+    <Button
+        android:id="@+id/stats_from_date_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="dd/mm/yyyy"
+        app:layout_constraintEnd_toStartOf="@+id/textView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/stats_to_date_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="dd/mm/yyyy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/statisticsviewer_title"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="-"
         android:textSize="36sp"
+        app:layout_constraintEnd_toStartOf="@+id/stats_to_date_button"
+        app:layout_constraintStart_toEndOf="@+id/stats_from_date_button"
+        app:layout_constraintTop_toTopOf="@+id/stats_to_date_button" />
+
+    <TextView
+        android:id="@+id/stats_total_time_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/total_time_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stats_from_date_button" />
+
+    <TextView
+        android:id="@+id/stats_average_time_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/average_time_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stats_total_time_text" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/stats_list_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/stats_average_time_text" />
 
+    <TextView
+        android:id="@+id/statistics_list_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="{categories}{tasks}"
+        app:layout_constraintBottom_toTopOf="@+id/stats_list_view"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/stats_average_percent_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="8dp"
+        android:text="%"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/stats_list_view"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/statistics_list_time_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="8dp"
+        android:text="TIME"
+        app:layout_constraintBottom_toTopOf="@+id/stats_list_view"
+        app:layout_constraintEnd_toStartOf="@+id/stats_average_percent_text" />
 </android.support.constraint.ConstraintLayout>

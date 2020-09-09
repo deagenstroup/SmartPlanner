@@ -11,7 +11,8 @@ import deagen.smartplanner.logic.tasks.ToDoTask;
 public class ScheduledToDoTask extends ToDoTask {
 	
 	/**
-	 * The amount of time allocated for the task.
+	 * The amount of time allocated for the task, if any at all. A null value indicates that the
+	 * task does not have a specified time limit.
 	 */
 	private Duration allocatedTime;
 	
@@ -42,12 +43,24 @@ public class ScheduledToDoTask extends ToDoTask {
 	public ScheduledToDoTask(ObjectInputStream stream) throws ClassNotFoundException, IOException {
 		this.load(stream);
 	}
-	
+
+	/**
+	 * @return The amount of time remaining for this task if there is a specified time limit. Null
+	 * if there is no specified time limit.
+	 */
 	public Duration getTimeRemaining() {
+		if(allocatedTime == null)
+			return null;
 		return allocatedTime.minus(timeSpent);
 	}
 
+	public String getTimeSpentString() {
+		return ToDoTask.getTimeText(this.getTimeSpent());
+	}
+
 	public String getTimeRemainingString() {
+		if(allocatedTime == null)
+			return null;
 		return ToDoTask.getTimeText(this.getTimeRemaining());
 	}
 
@@ -62,8 +75,15 @@ public class ScheduledToDoTask extends ToDoTask {
 	public void allocateMoreTime(Duration inTime) {
 		allocatedTime = timeSpent.plus(inTime);
 	}
-	
+
+	/**
+	 * @return True if the specified time limit has been reached for a task, ie. the time spent
+	 * on the task has reached the time allocated for it, false otherwise
+	 */
 	public boolean isFinished() {
+		if(allocatedTime == null) {
+			return false;
+		}
 		return allocatedTime.compareTo(timeSpent) <= 0;
 	}
 	

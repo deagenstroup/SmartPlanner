@@ -42,6 +42,8 @@ public class ActivityPlannerFragment extends Fragment {
      */
     private Planner planner;
 
+
+
     private MainActivity mainActivity;
 
     /**
@@ -70,7 +72,11 @@ public class ActivityPlannerFragment extends Fragment {
      */
     private FloatingActionButton addButton, deleteButton, scheduleButton;
 
+    private boolean withinCategoryView = false;
+
     private int selectedCategoryPosition = -1;
+
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -142,6 +148,20 @@ public class ActivityPlannerFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
+
+
+    public ActivityCategory getSelectedActivityCategory() {
+        //if the user is in the category selection screen then no category is currently selected
+        if(selectedCategoryPosition < 0)
+            return null;
+
+        return planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition);
+    }
+
+    public int getSelectedCategoryPosition() {
+        return selectedCategoryPosition;
+    }
+
     public void setPlanner(Planner inPlanner) {
         planner = inPlanner;
     }
@@ -150,16 +170,13 @@ public class ActivityPlannerFragment extends Fragment {
         mainActivity = inActivity;
     }
 
+
+
     /**
      * Sets whether the edit buttons for the task (schedule & delete) are visible on screen or not.
      * @param visible If true, buttons are visible, otherwise they are hidden.
      */
     public void setEditButtonsVisible(boolean visible) {
-//        if(visible && constraintLayout.findViewById(R.id.activityplanner_delete_button) == null) {
-//            constraintLayout.addView(deleteButton);
-//        } else {
-//            constraintLayout.removeView(deleteButton);
-//        }
         if(visible) {
             ((View) deleteButton).setVisibility(View.VISIBLE);
             ((View) scheduleButton).setVisibility(View.VISIBLE);
@@ -181,28 +198,30 @@ public class ActivityPlannerFragment extends Fragment {
      * Sets the activity to list categories for the user to select.
      */
     public void setCategoryView() {
+        withinCategoryView = true;
         mainActivity.setOnBackKeyListener(null);
         recycleViewContainer.addView(categoryView);
         ((TextView)constraintLayout.findViewById(R.id.activityplanner_title_text)).setText(R.string.task_categories_title);
 
         // setting the listeners for the add and delete buttons
-        addButton.setOnClickListener(new FloatingActionButton.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Log.d("DEV", "add button pressed - add a task category");
-            }
-        });
+        addButton.setOnClickListener(addCategoryListener);
 
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CategoryListAdapter adapter = ((CategoryListAdapter)categoryView.getAdapter());
-                int removePosition = selectedCategoryPosition;
-                adapter.unselectHolder();
-                planner.getActivityPlanner().removeActivityCategory(removePosition);
-                adapter.notifyDataSetChanged();
-            }
-        });
+        deleteButton.setOnClickListener(deleteCategoryListener);
+    }
+
+    public void setCategoryViewBackKeyListener() {
+        if(!withinCategoryView) {
+            // setting the listener for the back key so that the user can go back to the main menu
+            mainActivity.setOnBackKeyListener(new MainActivity.BackKeyListener() {
+                @Override
+                public void onBackKeyPressed() {
+                    recycleViewContainer.removeView(taskView);
+                    setCategoryView();
+                    setEditButtonsVisible(false);
+                    mainActivity.getDailyPlannerFragment().setBackKeyHandler();
+                }
+            });
+        }
     }
 
     /**
@@ -211,7 +230,7 @@ public class ActivityPlannerFragment extends Fragment {
      *                 the planner object.
      */
     public void openCategory(int position) {
-//        Log.d("CATEGORY SELECTION", "category position: " + position);
+        withinCategoryView = false;
         selectedCategoryPosition = position;
 
         // adding the task list to the screen
@@ -223,19 +242,11 @@ public class ActivityPlannerFragment extends Fragment {
         taskView.setAdapter(new TaskListAdapter(planner, this));
         recycleViewContainer.addView(taskView);
 
+        setCategoryViewBackKeyListener();
+
         // changing the title at the top
         String titleString = planner.getActivityPlanner().getCategories()[selectedCategoryPosition];
         ((TextView)constraintLayout.findViewById(R.id.activityplanner_title_text)).setText(titleString);
-
-        // setting the listener for the back key so that the user can go back to the main menu
-        mainActivity.setOnBackKeyListener(new MainActivity.BackKeyListener() {
-            @Override
-            public void onBackKeyPressed() {
-                recycleViewContainer.removeView(taskView);
-                setCategoryView();
-                setEditButtonsVisible(false);
-            }
-        });
 
         // setting the listeners for the add and delete buttons
         addButton.setOnClickListener(new FloatingActionButton.OnClickListener() {
@@ -256,6 +267,7 @@ public class ActivityPlannerFragment extends Fragment {
                        // adding the task to the selected category
                        planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition).addToDoTask(task);
                        taskView.getAdapter().notifyDataSetChanged();
+                       mainActivity.saveToFile();
                    }
                });
                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
@@ -275,6 +287,7 @@ public class ActivityPlannerFragment extends Fragment {
                 getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
                 adapter.unselectHolder();
                 adapter.notifyDataSetChanged();
+                mainActivity.saveToFile();
             }
         });
         scheduleButton.setOnClickListener(new View.OnClickListener() {
@@ -285,14 +298,79 @@ public class ActivityPlannerFragment extends Fragment {
                 ScheduledToDoTask scheduledTask = new ScheduledToDoTask(task, Duration.ofMinutes(10L));
                 mainActivity.switchFragments(mainActivity.getDailyPlannerFragment());
                 mainActivity.tapNavigationButton(0);
-                mainActivity.getDailyPlannerFragment().changeTaskTime(scheduledTask);
+                mainActivity.getDailyPlannerFragment().askForTaskTime(scheduledTask);
+//                mainActivity.getDailyPlannerFragment().changeTaskTime(scheduledTask);
                 planner.addTask(scheduledTask);
-                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
+                promptToRemoveTask(getSelectedActivityCategory(), adapter.getSelectedHolderPosition());
+//                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
                 adapter.unselectHolder();
                 adapter.notifyDataSetChanged();
                 mainActivity.getDailyPlannerFragment().updateCurrentTask();
+                mainActivity.saveToFile();
             }
         });
+    }
+
+
+    private FloatingActionButton.OnClickListener addCategoryListener = new FloatingActionButton.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            final EditText editText = new EditText(builder.getContext());
+            builder.setTitle("Input category name:");
+            builder.setView(editText);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface inferface, int which) {
+                    ActivityCategory category = new ActivityCategory(editText.getText().toString());
+                    planner.getActivityPlanner().addActivityCategory(category);
+                    categoryView.getAdapter().notifyDataSetChanged();
+                    mainActivity.saveToFile();
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            builder.show();
+//                Log.d("DEV", "add button pressed - add a task category");
+        }
+    };
+
+    private FloatingActionButton.OnClickListener deleteCategoryListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            CategoryListAdapter adapter = ((CategoryListAdapter)categoryView.getAdapter());
+            int removePosition = selectedCategoryPosition;
+            adapter.unselectHolder();
+            planner.getActivityPlanner().removeActivityCategory(removePosition);
+            adapter.notifyDataSetChanged();
+        }
+    };
+
+    /**
+     * Prompts the user if they would like to remove the task within a specific ActivityCategory
+     * @param category The ActivityCategory that the task is within.
+     * @param pos The position of the task in the list of tasks within the ActivityCategory.
+     */
+    public void promptToRemoveTask(final ActivityCategory category, final int pos) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this.getContext());
+        dialogBuilder.setTitle("Would you like to remove this task from its list?");
+        dialogBuilder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                category.removeTask(pos);
+            }
+        });
+        dialogBuilder.setNegativeButton("no", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        dialogBuilder.show();
     }
 
     /**
@@ -311,17 +389,7 @@ public class ActivityPlannerFragment extends Fragment {
 
     }
 
-    public ActivityCategory getSelectedActivityCategory() {
-        //if the user is in the category selection screen then no category is currently selected
-        if(selectedCategoryPosition < 0)
-            return null;
 
-        return planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition);
-    }
-
-    public int getSelectedCategoryPosition() {
-        return selectedCategoryPosition;
-    }
 
 //    // TODO: Rename method, update argument and hook method into UI event
 //    public void onButtonPressed(Uri uri) {

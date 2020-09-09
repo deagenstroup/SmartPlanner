@@ -3,14 +3,15 @@
 
     <item
         android:id="@+id/dailyplanner_button"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@drawable/calendar_icon_foreground"
         android:title="@string/dailyplanner_button" />
     <item
         android:id="@+id/activityplanner_button"
-        android:icon="@android:drawable/ic_menu_sort_alphabetically"
+        android:icon="@drawable/clipboard_foreground"
+        android:iconTint="@android:color/black"
         android:title="@string/activityplanner_button" />
     <item
         android:id="@+id/stats_button"
-        android:icon="@android:drawable/ic_menu_recent_history"
+        android:icon="@drawable/clock_icon_foreground"
         android:title="@string/stats_button" />
 </menu>

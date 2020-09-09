@@ -23,6 +23,8 @@ import deagen.smartplanner.fragments.ActivityPlannerFragment;
 import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.fragments.StatisticsFragment;
 import deagen.smartplanner.logic.Planner;
+import deagen.smartplanner.logic.taskplanning.ActivityPlanner;
+import deagen.smartplanner.logic.taskscheduling.TaskManager;
 
 /**
  * The only activity which composes the TaskManager app
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private DailyPlannerFragment dailyPlanner;
     private ActivityPlannerFragment activityPlanner;
-    private Fragment statsViewer;
+    private StatisticsFragment statsViewer;
     private Planner planner;
     private BackKeyListener backKeyListener;
 
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity
 
         dailyPlanner = new DailyPlannerFragment();
         activityPlanner = new ActivityPlannerFragment();
-        statsViewer = StatisticsFragment.newInstance(null, null);
+        statsViewer = StatisticsFragment.newInstance();
 
         planner = new Planner();
         this.loadFromFile();
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity
         dailyPlanner.setPlanner(planner);
         activityPlanner.setPlanner(planner);
         activityPlanner.setActivity(this);
+        statsViewer.setPlanner(planner);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -107,6 +110,10 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if(this.getVisibleFragment() != null)
             transaction.hide(this.getVisibleFragment());
+        if(fragment instanceof DailyPlannerFragment)
+            ((DailyPlannerFragment)fragment).setBackKeyHandler();
+        else if(fragment instanceof ActivityPlannerFragment)
+            ((ActivityPlannerFragment)fragment).setCategoryViewBackKeyListener();
         transaction.show(fragment);
         transaction.commit();
     }
@@ -157,6 +164,21 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("DEBUG", "User has switched away from the application");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        TaskManager taskManager = planner.getTaskManager();
+        if(taskManager.isActive())
+            taskManager.stopTasks();
+        planner.save(mainFileName);
+    }
+
     //back button methods
 
     @Override
@@ -184,7 +206,7 @@ public class MainActivity extends AppCompatActivity
             ObjectOutputStream stream =
                     new ObjectOutputStream(getApplicationContext().openFileOutput(mainFileName, Context.MODE_PRIVATE));
             planner.save(stream);
-            Log.d("debug", "file saved successfully");
+            Log.d("MainActivity", "saveToFile successful.");
         } catch(FileNotFoundException exp) {
             Log.d("I/O Exception", "FileNotFound while saving");
         } catch(IOException exp) {

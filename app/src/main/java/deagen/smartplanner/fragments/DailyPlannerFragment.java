@@ -38,6 +38,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 
 import deagen.smartplanner.MainActivity;
+import deagen.smartplanner.logic.taskscheduling.TaskManager;
 import deagen.smartplanner.ui.CompletedListAdapter;
 import deagen.smartplanner.R;
 import deagen.smartplanner.ui.ScheduledListAdapter;
@@ -141,7 +142,6 @@ public class DailyPlannerFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
@@ -149,7 +149,7 @@ public class DailyPlannerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("DEV", "onCreate called in the DailyPlannerFragment");
+//        Log.d("DEV", "onCreate called in the DailyPlannerFragment");
 
         // initializing the receiver to update the fragment's UI upon receiving a message from
         // the TaskManagerService
@@ -166,6 +166,8 @@ public class DailyPlannerFragment extends Fragment {
                 }
             }
         };
+
+        planner.getTaskManager().setDailyPlannerFragment(this);
     }
 
     /**
@@ -249,8 +251,8 @@ public class DailyPlannerFragment extends Fragment {
         completeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCurrentTaskHighlight(false);
-                setCompleteButtonsVisible(false);
+                setCompleteButtonVisible(false);
+                setExtendButtonVisible(false);
                 planner.getTaskManager().finishTask();
                 updateCurrentTask();
 
@@ -261,7 +263,8 @@ public class DailyPlannerFragment extends Fragment {
         extendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCompleteButtonsVisible(false);
+                setCompleteButtonVisible(false);
+                setExtendButtonVisible(false);
                 // get currently scheduled task
                 ScheduledToDoTask task = planner.getTaskManager().getCurrentTask();
                 // call time dialog to change time allocated for it
@@ -271,7 +274,8 @@ public class DailyPlannerFragment extends Fragment {
                 // resume the planner
             }
         });
-        setCompleteButtonsVisible(false);
+        setCompleteButtonVisible(false);
+        setExtendButtonVisible(false);
 
         startStopButton = view.findViewById(R.id.start_stop_button);
         startStopButton.setOnClickListener(new ImageButton.OnClickListener() {
@@ -285,7 +289,26 @@ public class DailyPlannerFragment extends Fragment {
         LocalBroadcastManager.getInstance(this.getContext()).registerReceiver(receiver,
                 new IntentFilter(TaskManagerService.UPDATE_UI));
 
+        this.setBackKeyHandler();
+
+        // check for unsafe exit and restore daily planner to previous state if so
+        if(planner.getTaskManager().checkForAbruptExit()) {
+            planner.getTaskManager().restartTasks(this);
+            setUIActiveMode(true);
+            Log.d("TaskManager", "TaskManager was abruptly stopped.");
+        }
+        Log.d("DailyPlannerFragment", "DailyPlanner was created successfully.");
         return view;
+    }
+
+    private void checkForAbruptExit() {
+        TaskManager taskManager = planner.getTaskManager();
+        if(taskManager.checkForAbruptExit()) {
+            // do gui things to restart dailyplanner
+
+
+            taskManager.restartTasks(this);
+        }
     }
 
     @Override
@@ -319,9 +342,10 @@ public class DailyPlannerFragment extends Fragment {
     }
 
     public void updateCurrentTask() {
-        scheduledListView.getAdapter().notifyDataSetChanged();
         if(planner.getTaskManager().isActive())
             setCurrentTaskHighlight(true);
+        scheduledListView.getAdapter().notifyDataSetChanged();
+
     }
 
 
@@ -385,20 +409,36 @@ public class DailyPlannerFragment extends Fragment {
     public void toggleActiveMode() {
         if(endOfTaskMode)
             return;
-        ((MainActivity)getActivity()).saveToFile();
         if(planner.getTaskManager().isActive()) {
             planner.getTaskManager().stopTasks();
-            startStopButton.setImageResource(android.R.drawable.ic_media_play);
-            addButton.show();
-            ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(true);
-            setCurrentTaskHighlight(false);
+            setUIActiveMode(false);
         } else {
             if(!planner.getTaskManager().startTasks(this))
                 return;
+            setUIActiveMode(true);
+        }
+        ((MainActivity)getActivity()).saveToFile();
+    }
+
+    /**
+     * Sets up all of the gui objects to either reflect active mode or non-active mode based on the
+     * parameter.
+     * @param activeMode If true the GUI objects in the DailyPlanner reflect active status, otherwise
+     *                   they represent non-active (paused) status.
+     */
+    private void setUIActiveMode(boolean activeMode) {
+        if(activeMode) {
             startStopButton.setImageResource(android.R.drawable.ic_media_pause);
             addButton.hide();
             ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(false);
             setCurrentTaskHighlight(true);
+            setCompleteButtonVisible(false);
+        } else {
+            startStopButton.setImageResource(android.R.drawable.ic_media_play);
+            addButton.show();
+            ((ScheduledListAdapter)scheduledListView.getAdapter()).setAllowOperations(true);
+            setCurrentTaskHighlight(false);
+            setCompleteButtonVisible(true);
         }
     }
 
@@ -437,10 +477,41 @@ public class DailyPlannerFragment extends Fragment {
     }
 
     /**
+     * Changes the handler of the back key, so that when pressed, the application is properly saved
+     * before exitting.
+     */
+    public void setBackKeyHandler() {
+        final MainActivity mainActivity = (MainActivity)this.getActivity();
+        mainActivity.setOnBackKeyListener(new MainActivity.BackKeyListener() {
+            @Override
+            public void onBackKeyPressed() {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+                dialogBuilder.setTitle("Are you sure you would like to exit?");
+                dialogBuilder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        planner.getTaskManager().stopService();
+                        updateCurrentTask();
+                        mainActivity.saveToFile();
+                        mainActivity.finish();
+                    }
+                });
+                dialogBuilder.setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                dialogBuilder.show();
+            }
+        });
+    }
+
+    /**
      * Sets whether the complete and extend buttons are visible.
      * @param visible If true, buttons are visible, otherwise false.
      */
-    public void setCompleteButtonsVisible(boolean visible) {
+    public void setExtendButtonVisible(boolean visible) {
         if(extendButton != null) {
             if (visible) {
                 extendButton.show();
@@ -448,6 +519,13 @@ public class DailyPlannerFragment extends Fragment {
                 extendButton.hide();
             }
         }
+        if(visible)
+            showCurrentTaskTime(false);
+        else
+            showCurrentTaskTime(true);
+    }
+
+    public void setCompleteButtonVisible(boolean visible) {
         if(completeButton != null) {
             if(visible) {
                 completeButton.show();
@@ -455,10 +533,10 @@ public class DailyPlannerFragment extends Fragment {
                 completeButton.hide();
             }
         }
-        if(visible)
-            showCurrentTaskTime(false);
-        else
-            showCurrentTaskTime(true);
+//        if(visible)
+//            showCurrentTaskTime(false);
+//        else
+//            showCurrentTaskTime(true);
     }
 
     /**
@@ -483,7 +561,8 @@ public class DailyPlannerFragment extends Fragment {
      */
     public void endOfTaskWait() {
         endOfTaskMode = true;
-        setCompleteButtonsVisible(true);
+        setCompleteButtonVisible(true);
+        setExtendButtonVisible(true);
         startStopButton.setImageResource(android.R.drawable.ic_media_play);
     }
 
@@ -500,6 +579,8 @@ public class DailyPlannerFragment extends Fragment {
         else
             holder.time.setVisibility(View.INVISIBLE);
     }
+
+
 
     // dialog methods for task manipulation
 
@@ -597,6 +678,33 @@ public class DailyPlannerFragment extends Fragment {
         timePickerDialog.setTitle("Choose allocated time:");
         timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         timePickerDialog.show();
+    }
+
+    /**
+     * Asks the user if they would like to specify a time limit for the provided task and provides
+     * them with a prompt to set said time limit if they answer yes.
+     * @param inTask The task in question.
+     */
+    public void askForTaskTime(final ScheduledToDoTask inTask) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setTitle("Do you want to specify a time limit for this task?");
+        builder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                changeTaskTime(inTask);
+                scheduledListView.getAdapter().notifyDataSetChanged();
+                ((MainActivity)getActivity()).saveToFile();
+            }
+        });
+        builder.setNegativeButton("no", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                inTask.setAllocatedTime(null);
+                scheduledListView.getAdapter().notifyDataSetChanged();
+                ((MainActivity)getActivity()).saveToFile();
+            }
+        });
+        builder.show();
     }
 
     /**

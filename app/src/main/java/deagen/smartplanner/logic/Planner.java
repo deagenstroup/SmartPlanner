@@ -1,5 +1,7 @@
 package deagen.smartplanner.logic;
 
+import android.util.Log;
+
 import deagen.smartplanner.logic.statistics.TimeAnalyzer;
 import deagen.smartplanner.logic.taskplanning.ActivityCategory;
 import deagen.smartplanner.logic.taskplanning.ActivityPlanner;
@@ -14,6 +16,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -71,7 +74,6 @@ public class Planner {
 	public Planner(String fileName) throws FileNotFoundException {
 		this.load(fileName);
 		this.timeAnalyzer = new TimeAnalyzer(this.calendar);
-		this.taskManager = new TaskManager(this.getSelectedToDoList());
 	}
 
 
@@ -82,14 +84,15 @@ public class Planner {
 	 * Save the planner to the designated file
 	 */
 	private void save() {
-		if(fileName == null)
+		if(fileName == null) {
+			Log.e("Planner", "fileName is null, unable to save Planner object.");
 			return;
+		}
 		try {
 			ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(new File(fileName)));
-			calendar.save(stream);
-			activityPlanner.save(stream);
-			stream.close();
+			this.save(stream);
 		} catch(IOException e) {
+			Log.e("Planner", "IOException: unable to open stream object for planner save.");
 			e.printStackTrace();
 		}
 	}
@@ -99,9 +102,9 @@ public class Planner {
 	 */
 	public void save(ObjectOutputStream stream) {
 		try {
-			//ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(new File(fileName)));
 			calendar.save(stream);
 			activityPlanner.save(stream);
+			taskManager.save(stream);
 			stream.close();
 		} catch(IOException e) {
 			e.printStackTrace();
@@ -115,12 +118,9 @@ public class Planner {
 		fileName = inFileName;
 		try {
 			ObjectInputStream stream = new ObjectInputStream(new FileInputStream(new File(fileName)));
-			calendar = new ListCalendar(stream);
-			activityPlanner = new ActivityPlanner(stream);
-		} catch(FileNotFoundException e) {
-			throw(e);
-		} catch (Exception e) {
-			e.printStackTrace();
+			this.load(stream);
+		} catch(IOException e) {
+			Log.e("Planner", "IOException: planner not loaded successfully.");
 		}
 	}
 
@@ -131,6 +131,7 @@ public class Planner {
 		try {
 			calendar = new ListCalendar(stream);
 			activityPlanner = new ActivityPlanner(stream);
+			taskManager = new TaskManager(this.getSelectedToDoList(), stream);
 		} catch(FileNotFoundException e) {
 			throw(e);
 		} catch (Exception e) {
@@ -152,6 +153,8 @@ public class Planner {
 	public TaskManager getTaskManager() {
 		return taskManager;
 	}
+
+	public ListCalendar getCalendar() { return calendar; }
 
 	/**
 	 * @return The ToDoList for the selected date.
@@ -249,8 +252,8 @@ public class Planner {
 	 * Used to add stub values to the Planner for testing purposes.
 	 */
 	public void addTestValues() {
-		calendar.getToDoList(LocalDate.of(2020, 1, 16)).addScheduledTask(
-				new ScheduledToDoTask("nothing", "misc", Duration.ofSeconds(5L)));
+//		calendar.getToDoList(LocalDate.of(2020, 1, 16)).addScheduledTask(
+//				new ScheduledToDoTask("nothing", "misc", Duration.ofSeconds(5L)));
 //		ToDoList list;
 //		list = new ToDoList();
 //		list.addScheduledTask(new ScheduledToDoTask("study for Databases final", "schoolwork", Duration.ofSeconds(5L)));

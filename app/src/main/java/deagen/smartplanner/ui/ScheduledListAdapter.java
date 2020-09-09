@@ -42,7 +42,11 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         ScheduledHolder scheduledHolder = (ScheduledHolder) holder;
         scheduledHolder.task.setText(schTask.getName());
         scheduledHolder.category.setText(schTask.getCategory());
-        scheduledHolder.time.setText(schTask.getTimeRemainingString());
+        if(schTask.getTimeRemaining() == null) {
+            scheduledHolder.time.setText(schTask.getTimeSpentString());
+        } else {
+            scheduledHolder.time.setText(schTask.getTimeRemainingString());
+        }
     }
 
     @Override

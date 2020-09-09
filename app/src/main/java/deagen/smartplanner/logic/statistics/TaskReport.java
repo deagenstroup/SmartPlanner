@@ -4,7 +4,7 @@ import java.time.Duration;
 
 /**
  * A collection of statistics about time spent on unique tasks within a greater CategoryReport
- * object.
+ * object.x
  */
 public class TaskReport {
 
@@ -30,6 +30,13 @@ public class TaskReport {
 
     public TaskReport(CategoryReport categoryReport) {
         this.categoryReport = categoryReport;
+    }
+
+    public TaskReport(CategoryReport categoryReport, String name, Duration totalTime, int taskCount) {
+        this.categoryReport = categoryReport;
+        this.name = name;
+        this.totalTime = totalTime;
+        this.taskCount = taskCount;
     }
 
     public String getName() {

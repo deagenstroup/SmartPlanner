@@ -30,6 +30,10 @@ import deagen.smartplanner.logic.taskscheduling.TaskManager;
  */
 public class TaskManagerService extends IntentService implements DailyPlannerUserInterface {
 
+    /**
+     * Fixed string values which specify messages to be spent between the service and GUI instances
+     * of the application.
+     */
     public static final String UPDATE_UI = "TaskManagerService.UPDATE_UI",
                                UPDATE = "TaskManagerService.UPDATE",
                                PRE_UPDATE = "TaskManagerService.PRE_UPDATE",
@@ -57,6 +61,8 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
 
     private TaskManager taskManager;
 
+    private boolean stopFlag = false;
+
     private final IBinder binder = new TaskManagerServiceBinder();
 
     /**
@@ -82,14 +88,22 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         this.taskManager = inManager;
     }
 
+    /**
+     * Called when the service is initialized.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
         broadcaster = LocalBroadcastManager.getInstance(this);
     }
 
+    /**
+     * Called when the startService method is used to start the actual service after it has been
+     * created.
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        stopFlag = false;
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -100,16 +114,31 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
             while(taskManager == null) {
                 try {
                     Thread.sleep(1000);
-                } catch(InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 
             // starting the active mode of the task manager
             this.createCurrentTaskNotification();
+            long saveTime = System.currentTimeMillis();
             do {
-                taskManager.spendTimeOnCurrentTask(Duration.ofSeconds(1));
+                taskManager.logTimeOnCurrentTask();
+
+                // save the TaskManager to file every 60 seconds
+                if((System.currentTimeMillis() - saveTime) >= Duration.ofMinutes(1L).toMillis()) {
+                    taskManager.saveToFile();
+                    saveTime = System.currentTimeMillis();
+                }
+
+
+
                 this.updateCurrentTask();
+
+                if(stopFlag) {
+                    taskManager.stopTasks();
+                    this.stopSelf();
+                }
 //                ScheduledToDoTask task = taskManager.getCurrentTask();
 //                Log.d("TESTING", "Current Task: " + task.getName() + " time: " + task.getTimeRemainingString());
                 try {
@@ -132,8 +161,8 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         ScheduledToDoTask task = taskManager.getCurrentTask();
         String notificationText = task.getName() + " - " + task.getTimeRemainingString();
         notificationBuilder.setSmallIcon(android.R.drawable.ic_dialog_info);
-        notificationBuilder.setContentTitle("Active Task");
         notificationBuilder.setContentText(notificationText);
+        notificationBuilder.setSound(null);
 
 //        Intent activityIntent = new Intent(this, MainActivity.class);
 //        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -147,9 +176,10 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, activityIntent, 0));
 
         if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            notificationChannelId = "planner";
+            notificationChannelId = "planner1";
             NotificationChannel channel = new NotificationChannel(notificationChannelId,
                     "Planner notification channel", NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setSound(null, null);
             notificationManager.createNotificationChannel(channel);
             notificationBuilder.setChannelId(notificationChannelId);
         }
@@ -167,6 +197,10 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         broadcaster.sendBroadcast(intent);
     }
 
+    public void setStopFlag(boolean flag) {
+        this.stopFlag = flag;
+    }
+
     /**
      * Updates the current task notification and relevent DailyPlannerFragment GUI objects to
      * reflect the task that is currently being worked on.
@@ -176,6 +210,7 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         ScheduledToDoTask task = taskManager.getCurrentTask();
         String notificationText = task.getName() + " - " + task.getTimeRemainingString();
         notificationBuilder.setContentText(notificationText);
+        notificationBuilder.setSound(null);
         notificationManager.notify(1, notificationBuilder.build());
         this.sendUpdateMessage(UPDATE);
     }
@@ -207,5 +242,8 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
 
     public void postEndTaskUpdate() {
         this.sendUpdateMessage(POST_UPDATE);
+    }
+
+    public void onDestroy() {
     }
 }
