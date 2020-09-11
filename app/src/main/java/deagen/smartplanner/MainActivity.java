@@ -2,17 +2,16 @@ package deagen.smartplanner;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction ;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,7 +22,6 @@ import deagen.smartplanner.fragments.ActivityPlannerFragment;
 import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.fragments.StatisticsFragment;
 import deagen.smartplanner.logic.Planner;
-import deagen.smartplanner.logic.taskplanning.ActivityPlanner;
 import deagen.smartplanner.logic.taskscheduling.TaskManager;
 
 /**
@@ -50,7 +48,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.app_bar_main);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         BottomNavigationView view = (BottomNavigationView) findViewById(R.id.mainactivity_navigation_view);
         view.setOnNavigationItemSelectedListener(this);
@@ -68,8 +69,6 @@ public class MainActivity extends AppCompatActivity
         activityPlanner.setPlanner(planner);
         activityPlanner.setActivity(this);
         statsViewer.setPlanner(planner);
-
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         // adding the ActivityPlanner fragment and hiding it
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

@@ -1,6 +1,6 @@
 package deagen.smartplanner.ui;
 
-import android.support.constraint.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;

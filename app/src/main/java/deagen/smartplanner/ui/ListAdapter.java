@@ -1,7 +1,7 @@
 package deagen.smartplanner.ui;
 
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.widget.TextView;
 
 import deagen.smartplanner.R;
