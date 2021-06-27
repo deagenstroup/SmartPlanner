@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 import deagen.smartplanner.R;
+import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.Planner;
 
 /**

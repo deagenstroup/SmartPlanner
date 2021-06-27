@@ -31,6 +31,14 @@ public class ActivityCategory {
 		return tasks.get(position);
 	}
 
+	public ToDoTask getTask(String name) {
+		for(ToDoTask task : tasks) {
+			if(task.getName().equals(name))
+				return task;
+		}
+		return null;
+	}
+
 	public int getNumberOfTasks() {
 		return tasks.size();
 	}
@@ -41,6 +49,8 @@ public class ActivityCategory {
 	}
 	
 	public void addToDoTask(ToDoTask task) {
+		if(this.getTask(task.getName()) != null)
+			return;
 		task.setCategory(name);
 		tasks.add(task);
 	}

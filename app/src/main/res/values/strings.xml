@@ -3,6 +3,10 @@
 
     <string name="dailyplanner_appbar_title">DD/MM/YYYY</string>
 
+    <string name="date_option_title">Change Date</string>
+    <string name="task_toggle_option_title">Start/Stop Tasks</string>
+    <string name="break_option_title">Take a Break</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="dailyplanner_button">Daily Planner</string>

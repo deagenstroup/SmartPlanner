@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/task_toggle_option"
+        android:title="@string/task_toggle_option_title"
+        android:icon="@android:drawable/ic_media_play"
+        android:orderInCategory="10"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/change_date_option"
+        android:title="@string/date_option_title"
+        android:icon="@android:drawable/ic_menu_today"
+        android:orderInCategory="20"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/break_option"
+        android:title="@string/break_option_title"
+        android:icon="@drawable/ic_cup"
+        android:orderInCategory="20"
+        app:showAsAction="ifRoom" />
+
+</menu>

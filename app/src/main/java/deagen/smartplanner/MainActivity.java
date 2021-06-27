@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import java.io.FileNotFoundException;
@@ -39,11 +40,14 @@ public class MainActivity extends AppCompatActivity
     private static String mainFileName = "plannerfile.dat";
 
     private Toolbar toolbar;
+    private Menu mAppBarMenu;
     private DailyPlannerFragment dailyPlanner;
     private ActivityPlannerFragment activityPlanner;
     private StatisticsFragment statsViewer;
     private Planner planner;
     private BackKeyListener backKeyListener;
+
+//    private boolean updateDailyPlannerUIFlag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,45 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.app_bar_menu, menu);
+        mAppBarMenu = menu;
+        this.updateToggleButtonImage();
+        return true;
+    }
+
+//    public void setUpdateDailyPlannerUIFlag(boolean inFlag) {
+//        updateDailyPlannerUIFlag = inFlag;
+//    }
+
+    public void updateToggleButtonImage() {
+        if(planner.getTaskManager().isActive())
+            mAppBarMenu.findItem(R.id.task_toggle_option)
+                .setIcon(android.R.drawable.ic_media_pause);
+        else {
+            getAppBarMenu()
+                    .findItem(R.id.task_toggle_option)
+                    .setIcon(android.R.drawable.ic_media_play);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.task_toggle_option:
+                this.getDailyPlannerFragment().toggleActiveMode();
+                return true;
+            case R.id.change_date_option:
+                this.getDailyPlannerFragment().switchDates();
+                return true;
+            case R.id.break_option:
+                this.getDailyPlannerFragment().startBreakTask();
+            default:
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     //fragment manipulation methods
 
     @Override
@@ -109,17 +152,27 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if(this.getVisibleFragment() != null)
             transaction.hide(this.getVisibleFragment());
-        if(fragment instanceof DailyPlannerFragment)
-            ((DailyPlannerFragment)fragment).setBackKeyHandler();
-        else if(fragment instanceof ActivityPlannerFragment)
-            ((ActivityPlannerFragment)fragment).setCategoryViewBackKeyListener();
         transaction.show(fragment);
         transaction.commit();
+        if(fragment instanceof DailyPlannerFragment) {
+            ((DailyPlannerFragment) fragment).setBackKeyHandler();
+        }
+        else if(fragment instanceof ActivityPlannerFragment) {
+            ((ActivityPlannerFragment) fragment).setCategoryViewBackKeyListener();
+        }
     }
 
     public DailyPlannerFragment getDailyPlannerFragment() {
         return dailyPlanner;
     }
+
+    public ActivityPlannerFragment getActivityPlannerFragment() { return activityPlanner; }
+
+    public Toolbar getToolbar() {
+        return toolbar;
+    }
+
+    public Menu getAppBarMenu() { return mAppBarMenu; }
 
     //navigation button methods
 

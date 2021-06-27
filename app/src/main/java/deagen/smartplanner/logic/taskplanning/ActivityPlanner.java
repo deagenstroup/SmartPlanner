@@ -47,7 +47,11 @@ public class ActivityPlanner {
 		}
 		return strings;
 	}
-	
+
+	public void addTask(ToDoTask inTask) {
+		this.getActivityCategory(inTask.getCategory()).addToDoTask(inTask);
+	}
+
 	public ActivityCategory getActivityCategory(int position) {
 		return categories.get(position);
 	}

@@ -98,6 +98,8 @@ public class ToDoList {
 	public void addTask(ScheduledToDoTask task) {
 		toDoList.add(task);
 	}
+
+	public void addTask(ScheduledToDoTask task, int position) { toDoList.add(position, task); }
 	
 	/**
 	 * Used for testing, to be removed in final version

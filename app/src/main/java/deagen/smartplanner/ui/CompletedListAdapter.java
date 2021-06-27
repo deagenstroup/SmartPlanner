@@ -40,6 +40,8 @@ public class CompletedListAdapter extends ListAdapter {
         // create a new view
         ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
         ListAdapter.ToDoTaskHolder vh = new ListAdapter.ToDoTaskHolder(v);
+        vh.layoutView.removeView(vh.layoutView.findViewById(R.id.check_button));
+        vh.layoutView.removeView(vh.layoutView.findViewById(R.id.extend_button));
         return vh;
     }
 }

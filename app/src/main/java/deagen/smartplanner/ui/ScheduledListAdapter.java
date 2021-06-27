@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import deagen.smartplanner.MainActivity;
@@ -20,12 +21,15 @@ public class ScheduledListAdapter extends SelectionListAdapter {
 
     public static class ScheduledHolder extends SelectionHolder {
         public TextView task, category, time;
+        public ImageButton checkButton, extendButton;
         public ScheduledHolder(ConstraintLayout inLayout) {
             super(inLayout);
             layoutView = inLayout;
             task = layoutView.findViewById(R.id.task_text);
             category = layoutView.findViewById(R.id.category_text);
             time = layoutView.findViewById(R.id.time_text);
+            checkButton = layoutView.findViewById(R.id.check_button);
+            extendButton = layoutView.findViewById(R.id.extend_button);
         }
     }
 
@@ -47,6 +51,8 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         } else {
             scheduledHolder.time.setText(schTask.getTimeRemainingString());
         }
+        scheduledHolder.checkButton.setOnClickListener(((DailyPlannerFragment)fragment).getCompleteButtonListener());
+        scheduledHolder.extendButton.setOnClickListener(((DailyPlannerFragment)fragment).getExtendButtonListener());
     }
 
     @Override
@@ -76,12 +82,28 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         scheduledHolder.time.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dailyFragment.changeTaskTime(planner.getScheduledTask(holderPosition));
+                dailyFragment.changeTaskTime(planner.getScheduledTask(holderPosition), false);
                 ((MainActivity)dailyFragment.getActivity()).saveToFile();
                 Log.d("CLICK DEBUG", "You have clicked the time text");
             }
         });
-        dailyFragment.setDeleteButtonVisible(true);
+        dailyFragment.setRemoveButtonsVisible(true);
+    }
+
+    public void setExtendButtonVisible(ScheduledHolder holder, boolean visible) {
+        if(visible && holder.layoutView.findViewById(R.id.extend_button) == null)
+            holder.layoutView.addView(holder.extendButton);
+        else if(!visible && holder.layoutView.findViewById(R.id.extend_button) != null)
+            holder.layoutView.removeView(holder.extendButton);
+    }
+
+    public void setCompleteButtonVisible(ScheduledHolder holder, boolean visible) {
+        if(holder == null)
+            return;
+        if(visible && holder.layoutView.findViewById(R.id.check_button) == null)
+            holder.layoutView.addView(holder.checkButton);
+        else if(!visible && holder.layoutView.findViewById(R.id.check_button) != null)
+            holder.layoutView.removeView(holder.checkButton);
     }
 
     public SelectionHolder unselectHolder() {
@@ -93,7 +115,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             scheduledHolder.time.setOnClickListener(listener);
             scheduledHolder.category.setOnClickListener(listener);
         }
-        ((DailyPlannerFragment) fragment).setDeleteButtonVisible(false);
+        ((DailyPlannerFragment) fragment).setRemoveButtonsVisible(false);
         return returnHolder;
     }
 
@@ -103,11 +125,12 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         ((MainActivity)fragment.getActivity()).saveToFile();
     }
 
-    public void deleteCurrentItem() {
+    public ScheduledToDoTask deleteCurrentItem() {
         int itemPosition = selectedHolder.getAdapterPosition();
         unselectHolder();
-        planner.removeTask(itemPosition);
+        ScheduledToDoTask task = planner.removeTask(itemPosition);
         notifyDataSetChanged();
+        return task;
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -124,6 +147,8 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         // create a new view
         ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
         ScheduledHolder vh = new ScheduledHolder(v);
+        this.setCompleteButtonVisible(vh, false);
+        this.setExtendButtonVisible(vh, false);
         return vh;
     }
 

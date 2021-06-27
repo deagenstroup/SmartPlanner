@@ -201,7 +201,7 @@ public class ActivityPlannerFragment extends Fragment {
         withinCategoryView = true;
         mainActivity.setOnBackKeyListener(null);
         recycleViewContainer.addView(categoryView);
-        ((TextView)constraintLayout.findViewById(R.id.activityplanner_title_text)).setText(R.string.task_categories_title);
+        this.updateAppBar();
 
         // setting the listeners for the add and delete buttons
         addButton.setOnClickListener(addCategoryListener);
@@ -245,8 +245,9 @@ public class ActivityPlannerFragment extends Fragment {
         setCategoryViewBackKeyListener();
 
         // changing the title at the top
-        String titleString = planner.getActivityPlanner().getCategories()[selectedCategoryPosition];
-        ((TextView)constraintLayout.findViewById(R.id.activityplanner_title_text)).setText(titleString);
+//        String titleString = planner.getActivityPlanner().getCategories()[selectedCategoryPosition];
+//        ((TextView)constraintLayout.findViewById(R.id.activityplanner_title_text)).setText(titleString);
+        this.updateAppBar();
 
         // setting the listeners for the add and delete buttons
         addButton.setOnClickListener(new FloatingActionButton.OnClickListener() {
@@ -309,6 +310,28 @@ public class ActivityPlannerFragment extends Fragment {
                 mainActivity.saveToFile();
             }
         });
+    }
+
+    public void updateAppBar() {
+        if(!withinCategoryView) {
+            String titleString = planner.getActivityPlanner().getCategories()[selectedCategoryPosition];
+            ((MainActivity) getActivity()).getToolbar().setTitle(titleString);
+        } else {
+            ((MainActivity) getActivity()).getToolbar().setTitle("Task Categories");
+        }
+    }
+
+    public void updateUIList() {
+        if(withinCategoryView)
+            categoryView.getAdapter().notifyDataSetChanged();
+        else
+            taskView.getAdapter().notifyDataSetChanged();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        this.updateAppBar();
     }
 
 

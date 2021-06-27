@@ -29,6 +29,10 @@ public class ToDoTask {
 	public ToDoTask() {
 		this.setName("task");
 	}
+
+	public ToDoTask(ScheduledToDoTask inTask) {
+		this(inTask.getName(), inTask.getCategory());
+	}
 	
 	public ToDoTask(ObjectInputStream stream) throws ClassNotFoundException, IOException {
 		this.load(stream);

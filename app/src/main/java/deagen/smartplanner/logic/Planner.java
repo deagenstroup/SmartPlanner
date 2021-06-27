@@ -146,6 +146,11 @@ public class Planner {
 		return selectedDate;
 	}
 
+	public String getDateText() {
+		LocalDate date = this.getDate();
+		return "" + date.getMonthValue() + "/" + date.getDayOfMonth() + "/" + date.getYear();
+	}
+
 	public ActivityPlanner getActivityPlanner() {
 		return activityPlanner;
 	}
@@ -232,11 +237,11 @@ public class Planner {
 			calendar.addToDoList(new ToDoList(), selectedDate);
 			taskManager.setToDoList(this.getSelectedToDoList());
 		}
-		this.getSelectedToDoList().addTask(task);
+		this.getSelectedToDoList().addTask(task, 0);
 	}
 	
-	public void removeTask(int position) {
-		this.getSelectedToDoList().removeTask(position);
+	public ScheduledToDoTask removeTask(int position) {
+		return this.getSelectedToDoList().removeTask(position);
 	}
 
 	public void moveScheduledTask(int from, int to) {
