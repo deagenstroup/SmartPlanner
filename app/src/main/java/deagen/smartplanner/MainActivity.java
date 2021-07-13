@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity
     private Menu mAppBarMenu;
     private DailyPlannerFragment dailyPlanner;
     private ActivityPlannerFragment activityPlanner;
-    private StatisticsFragment statsViewer;
     private Planner planner;
     private BackKeyListener backKeyListener;
 
@@ -62,7 +61,6 @@ public class MainActivity extends AppCompatActivity
 
         dailyPlanner = new DailyPlannerFragment();
         activityPlanner = new ActivityPlannerFragment();
-        statsViewer = StatisticsFragment.newInstance();
 
         planner = new Planner();
         this.loadFromFile();
@@ -72,16 +70,11 @@ public class MainActivity extends AppCompatActivity
         dailyPlanner.setPlanner(planner);
         activityPlanner.setPlanner(planner);
         activityPlanner.setActivity(this);
-        statsViewer.setPlanner(planner);
 
         // adding the ActivityPlanner fragment and hiding it
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, activityPlanner);
         transaction.hide(activityPlanner);
-
-        // adding the statistics viewer fragment and hiding it
-        transaction.add(R.id.fragment_container, statsViewer);
-        transaction.hide(statsViewer);
 
         // adding the DailyPlanner fragment and showing it
         transaction.add(R.id.fragment_container, dailyPlanner);
@@ -191,10 +184,6 @@ public class MainActivity extends AppCompatActivity
             case 1:
                 navView.setSelectedItemId(R.id.activityplanner_button);
                 break;
-
-            case 2:
-                navView.setSelectedItemId(R.id.stats_button);
-                break;
         }
     }
 
@@ -207,10 +196,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.activityplanner_button:
                 this.switchFragments(activityPlanner);
                 toolbar.setTitle(R.string.activityplanner_title);
-                return true;
-            case R.id.stats_button:
-                this.switchFragments(statsViewer);
-                toolbar.setTitle(R.string.statisticsviewer_title);
                 return true;
         }
         return false;

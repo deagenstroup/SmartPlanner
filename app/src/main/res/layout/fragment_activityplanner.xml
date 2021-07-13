@@ -22,26 +22,24 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/activityplanner_add_button"
-        style="@style/BottomFloatingButton"
-        android:src="@drawable/add_icon_foreground"
+        style="@style/BottomAddButton"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="56dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- android:src="@drawable/add_icon_foreground" -->
+        <!-- app:maxImageSize="60dp" -->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/activityplanner_delete_button"
-        style="@style/BottomFloatingButton"
-        android:src="@drawable/ic_delete"
+        style="@style/BottomDeleteButton"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/activityplanner_add_button"
-        app:maxImageSize="26dp" />
+        app:layout_constraintEnd_toStartOf="@+id/activityplanner_add_button" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/activityplanner_schedule_button"
         style="@style/BottomFloatingButton"
-        android:src="@drawable/ic_schedule"
+        android:src="@drawable/ic_calendar_date_vec"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/activityplanner_delete_button"
-        app:maxImageSize="28dp" />
+        app:maxImageSize="32dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

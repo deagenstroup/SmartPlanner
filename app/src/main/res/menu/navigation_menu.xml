@@ -3,15 +3,11 @@
 
     <item
         android:id="@+id/dailyplanner_button"
-        android:icon="@drawable/calendar_icon_foreground"
+        android:icon="@drawable/ic_calendar_list_vec"
         android:title="@string/dailyplanner_button" />
     <item
         android:id="@+id/activityplanner_button"
         android:icon="@drawable/clipboard_foreground"
         android:iconTint="@android:color/black"
         android:title="@string/activityplanner_button" />
-    <item
-        android:id="@+id/stats_button"
-        android:icon="@drawable/clock_icon_foreground"
-        android:title="@string/stats_button" />
 </menu>

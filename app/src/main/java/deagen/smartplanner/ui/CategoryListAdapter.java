@@ -32,6 +32,7 @@ public class CategoryListAdapter extends SelectionListAdapter {
     @Override
     public void selectHolder(SelectionHolder selectionHolder) {
         super.selectHolder(selectionHolder);
+        ((ActivityPlannerFragment)fragment).setSelectedCategoryPosition(this.getSelectedHolderPosition());
         ((ActivityPlannerFragment)fragment).setDeleteButtonVisible(true);
     }
 
@@ -41,6 +42,7 @@ public class CategoryListAdapter extends SelectionListAdapter {
 
     public SelectionHolder unselectHolder() {
         SelectionHolder holder = super.unselectHolder();
+        ((ActivityPlannerFragment)fragment).setSelectedCategoryPosition(-1);
         ((ActivityPlannerFragment)fragment).setDeleteButtonVisible(false);
         return holder;
     }

@@ -31,6 +31,25 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             checkButton = layoutView.findViewById(R.id.check_button);
             extendButton = layoutView.findViewById(R.id.extend_button);
         }
+
+        /**
+         * Returns true if the time TextView is currently inside the layoutView container.
+         */
+        public boolean isTimeTextVisible() {
+            return layoutView.findViewById(time.getId()) != null;
+        }
+
+        /**
+         * Adds or removes the time TextView from the layoutView container based on the provided
+         * parameter.
+         */
+        public void toggleTimeTextVisibility(boolean visible) {
+            if(visible && !isTimeTextVisible()) {
+                layoutView.addView(time);
+            } else if(!visible && isTimeTextVisible()) {
+                layoutView.removeView(time);
+            }
+        }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
@@ -46,9 +65,20 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         ScheduledHolder scheduledHolder = (ScheduledHolder) holder;
         scheduledHolder.task.setText(schTask.getName());
         scheduledHolder.category.setText(schTask.getCategory());
-        if(schTask.getTimeRemaining() == null) {
-            scheduledHolder.time.setText(schTask.getTimeSpentString());
+
+        // If the scheduled task does not have a specified time period of completion
+        if(schTask.isUntimedTask()) {
+            // If the task has not been worked on yet
+            if(schTask.getTimeSpentString().equals("0:00:00")) {
+                // Remove the time text from the view
+                scheduledHolder.toggleTimeTextVisibility(false);
+                // Otherwise if it has been worked on and the view is not currently in the container
+            } else {
+                scheduledHolder.toggleTimeTextVisibility(true);
+                scheduledHolder.time.setText(schTask.getTimeSpentString());
+            }
         } else {
+            scheduledHolder.toggleTimeTextVisibility(true);
             scheduledHolder.time.setText(schTask.getTimeRemainingString());
         }
         scheduledHolder.checkButton.setOnClickListener(((DailyPlannerFragment)fragment).getCompleteButtonListener());
@@ -100,9 +130,9 @@ public class ScheduledListAdapter extends SelectionListAdapter {
     public void setCompleteButtonVisible(ScheduledHolder holder, boolean visible) {
         if(holder == null)
             return;
-        if(visible && holder.layoutView.findViewById(R.id.check_button) == null)
+        if(visible && holder.layoutView.findViewById(R.id.check_button) == null) {
             holder.layoutView.addView(holder.checkButton);
-        else if(!visible && holder.layoutView.findViewById(R.id.check_button) != null)
+        } else if(!visible && holder.layoutView.findViewById(R.id.check_button) != null)
             holder.layoutView.removeView(holder.checkButton);
     }
 
@@ -120,6 +150,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
     }
 
     public void moveItem(int fromPos, int toPos) {
+        this.setCompleteButtonVisible((ScheduledHolder)selectedHolder, false);
         // move the selected task to this position
         planner.moveScheduledTask(fromPos, toPos);
         ((MainActivity)fragment.getActivity()).saveToFile();

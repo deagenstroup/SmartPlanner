@@ -67,6 +67,13 @@ public class ScheduledToDoTask extends ToDoTask {
 	public Duration getTimeSpent() {
 		return timeSpent;
 	}
+
+	/**
+	 * @return True if this task does not have a specified timeframe of completion.
+	 */
+	public boolean isUntimedTask() {
+		return this.getTimeRemaining() == null;
+	}
 	
 	public void setAllocatedTime(Duration inTime) {
 		allocatedTime = inTime;

@@ -49,19 +49,15 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/dailyplanner_add_button"
-        style="@style/BottomFloatingButton"
-        android:src="@drawable/add_icon_foreground"
+        style="@style/BottomAddButton"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="60sp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/dailyplanner_delete_button"
-        style="@style/BottomFloatingButton"
-        android:src="@drawable/ic_delete"
+        style="@style/BottomDeleteButton"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/dailyplanner_add_button"
-        app:maxImageSize="26dp" />
+        app:layout_constraintEnd_toStartOf="@+id/dailyplanner_add_button" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/dailyplanner_revert_button"

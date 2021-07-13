@@ -159,7 +159,12 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         notificationBuilder = new NotificationCompat.Builder(this);
 
         ScheduledToDoTask task = taskManager.getCurrentTask();
-        String notificationText = task.getName() + " - " + task.getTimeRemainingString();
+        String notificationText = task.getName() + " - ";
+        if(task.isUntimedTask()) {
+            notificationText = notificationText + task.getTimeSpentString();
+        } else {
+            notificationText = notificationText + task.getTimeRemainingString();
+        }
         notificationBuilder.setSmallIcon(android.R.drawable.ic_dialog_info);
         notificationBuilder.setContentText(notificationText);
         notificationBuilder.setSound(null);
@@ -208,7 +213,12 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
     public void updateCurrentTask() {
         // getting the current task and sending the text to the current task notification
         ScheduledToDoTask task = taskManager.getCurrentTask();
-        String notificationText = task.getName() + " - " + task.getTimeRemainingString();
+        String notificationText = task.getName() + " - ";
+        if(task.isUntimedTask()) {
+            notificationText = notificationText + task.getTimeSpentString();
+        } else {
+            notificationText = notificationText + task.getTimeRemainingString();
+        }
         notificationBuilder.setContentText(notificationText);
         notificationBuilder.setSound(null);
         notificationManager.notify(1, notificationBuilder.build());

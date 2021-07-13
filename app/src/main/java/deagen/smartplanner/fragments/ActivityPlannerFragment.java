@@ -171,6 +171,9 @@ public class ActivityPlannerFragment extends Fragment {
     }
 
 
+    public void setSelectedCategoryPosition(int inPos) {
+        selectedCategoryPosition = inPos;
+    }
 
     /**
      * Sets whether the edit buttons for the task (schedule & delete) are visible on screen or not.
@@ -229,9 +232,9 @@ public class ActivityPlannerFragment extends Fragment {
      * @param position The location of the category within the list of categories contained in
      *                 the planner object.
      */
-    public void openCategory(int position) {
+    public void openCategory(final int position) {
         withinCategoryView = false;
-        selectedCategoryPosition = position;
+        this.setSelectedCategoryPosition(position);
 
         // adding the task list to the screen
         recycleViewContainer.removeView(categoryView);
@@ -256,6 +259,7 @@ public class ActivityPlannerFragment extends Fragment {
                // creating a dialog to get task info from the user
                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                final ToDoTask task = new ToDoTask();
+               final ActivityCategory selectedActivityCategory = planner.getActivityPlanner().getActivityCategory(position);
                builder.setTitle("Input task name: ");
                final EditText input = new EditText(builder.getContext());
                builder.setView(input);
@@ -266,7 +270,7 @@ public class ActivityPlannerFragment extends Fragment {
                    public void onClick(DialogInterface dialog, int which) {
                        task.setName(input.getText().toString());
                        // adding the task to the selected category
-                       planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition).addToDoTask(task);
+                       selectedActivityCategory.addToDoTask(task);
                        taskView.getAdapter().notifyDataSetChanged();
                        mainActivity.saveToFile();
                    }
@@ -285,7 +289,7 @@ public class ActivityPlannerFragment extends Fragment {
             public void onClick(View v) {
                 // unselecting the selected task and removing from the planner
                 TaskListAdapter adapter = ((TaskListAdapter)taskView.getAdapter());
-                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
+                planner.getActivityPlanner().getActivityCategory(position).removeTask(adapter.getSelectedHolderPosition());
                 adapter.unselectHolder();
                 adapter.notifyDataSetChanged();
                 mainActivity.saveToFile();
@@ -295,14 +299,14 @@ public class ActivityPlannerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 TaskListAdapter adapter = ((TaskListAdapter) taskView.getAdapter());
-                ToDoTask task = getSelectedActivityCategory().getTask(adapter.getSelectedHolderPosition());
+                ToDoTask task = planner.getActivityPlanner().getActivityCategory(position).getTask(adapter.getSelectedHolderPosition());
                 ScheduledToDoTask scheduledTask = new ScheduledToDoTask(task, Duration.ofMinutes(10L));
                 mainActivity.switchFragments(mainActivity.getDailyPlannerFragment());
                 mainActivity.tapNavigationButton(0);
                 mainActivity.getDailyPlannerFragment().askForTaskTime(scheduledTask);
 //                mainActivity.getDailyPlannerFragment().changeTaskTime(scheduledTask);
                 planner.addTask(scheduledTask);
-                promptToRemoveTask(getSelectedActivityCategory(), adapter.getSelectedHolderPosition());
+                promptToRemoveTask(planner.getActivityPlanner().getActivityCategory(position), adapter.getSelectedHolderPosition());
 //                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
                 adapter.unselectHolder();
                 adapter.notifyDataSetChanged();
@@ -313,11 +317,14 @@ public class ActivityPlannerFragment extends Fragment {
     }
 
     public void updateAppBar() {
+        if(selectedCategoryPosition < 0)
+            return;
+
         if(!withinCategoryView) {
             String titleString = planner.getActivityPlanner().getCategories()[selectedCategoryPosition];
-            ((MainActivity) getActivity()).getToolbar().setTitle(titleString);
+            ((MainActivity) getActivity()).getToolbar().setTitle("To-Do: " + titleString);
         } else {
-            ((MainActivity) getActivity()).getToolbar().setTitle("Task Categories");
+            ((MainActivity) getActivity()).getToolbar().setTitle("To-Do");
         }
     }
 

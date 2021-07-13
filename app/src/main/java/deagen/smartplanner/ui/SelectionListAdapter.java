@@ -53,6 +53,8 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
     @Override
     public void onBindViewHolder(final SelectionHolder holder, int position) {
         final int holderPosition = holder.getAdapterPosition();
+
+        // Setting the click handler for the container of an individual holder (item in the list)
         holder.layoutView.setOnClickListener(new HolderListener(holder));
 //        holder.layoutView.setOnClickListener(new View.OnClickListener(){
 //            @Override
@@ -120,12 +122,15 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
         allowOperations = status;
     }
 
+    /**
+     * Handler for the click of a holder in the recyclerview.
+     */
     protected class HolderListener implements View.OnClickListener {
 
         private SelectionHolder holder;
 
         public HolderListener(SelectionHolder inHolder) {
-            holder=inHolder;
+            holder = inHolder;
         }
 
         @Override

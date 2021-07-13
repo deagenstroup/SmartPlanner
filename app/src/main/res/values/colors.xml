@@ -6,4 +6,7 @@
     <color name="white">#FFFFFF</color>
     <color name="green_selected">#7894ff</color>
     <color name="background_color">#DFDFDF</color>
+    <color name="black">#111217</color>
+    <color name="faded_grey">#4f5054</color>
+    <color name="light_grey">#bdbdbd</color>
 </resources>
