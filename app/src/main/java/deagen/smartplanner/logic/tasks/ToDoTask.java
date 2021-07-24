@@ -71,15 +71,17 @@ public class ToDoTask {
 	public static String getTimeText(Duration inDur) {
 		Duration time = inDur;
 		String timeString = "";
+		if(inDur.isNegative()) {
+			time = inDur.plusDays(1);
+			timeString = "+";
+		}
 		int hours = (int)time.toHours();
 		if(hours > 0) {
 			timeString += hours;
 			timeString += ":";
-		} else {
-			timeString += "0:";
 		}
 		int minutes = (int) time.toMinutes() % 60;
-		if(minutes < 10) {
+		if(minutes < 10 && timeString.length() > 0) {
 			timeString += "0" + minutes;
 		} else {
 			timeString += minutes;

@@ -41,6 +41,8 @@ public class ActivityPlanner {
 	}
 
 	public String[] getCategories() {
+		if(categories.size() == 0)
+			categories.add(new ActivityCategory("misc"));
 		String[] strings = new String[categories.size()];
 		for(int i = 0; i < strings.length; i++) {
 			strings[i] = categories.get(i).getName();

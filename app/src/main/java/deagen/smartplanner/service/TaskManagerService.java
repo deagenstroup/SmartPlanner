@@ -4,8 +4,13 @@ import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
+import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -17,6 +22,7 @@ import android.util.Log;
 import java.time.Duration;
 
 import deagen.smartplanner.MainActivity;
+import deagen.smartplanner.R;
 import deagen.smartplanner.logic.DailyPlannerUserInterface;
 import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
 import deagen.smartplanner.logic.taskscheduling.TaskManager;
@@ -40,6 +46,9 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
                                POST_UPDATE = "TaskManagerService.POST_UPDATE",
                                END_TASK = "TaskMangerService.END_TASK";
 
+    public Uri notificationSound;
+
+    private TaskManager taskManager;
 
     /**
      * Builder for the notification which displays the status of the current task.
@@ -57,13 +66,13 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
      */
     private LocalBroadcastManager broadcaster;
 
-    private String notificationChannelId;
-
-    private TaskManager taskManager;
+    private String notificationChannelId, audioChannelId;
 
     private boolean stopFlag = false;
 
     private final IBinder binder = new TaskManagerServiceBinder();
+
+
 
     /**
      * A binder class which allows components to bind to this service and call methods upon it.
@@ -82,10 +91,6 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
     public TaskManagerService() {
         super("TaskManagerService");
         taskManager = null;
-    }
-
-    public void setTaskManager(TaskManager inManager) {
-        this.taskManager = inManager;
     }
 
     /**
@@ -107,6 +112,10 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         return super.onStartCommand(intent, flags, startId);
     }
 
+    /**
+     * The main loop that handles the logic of the service.
+     * @param intent
+     */
     @Override
     protected void onHandleIntent(Intent intent) {
         if(intent != null) {
@@ -122,7 +131,7 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
             // starting the active mode of the task manager
             this.createCurrentTaskNotification();
             long saveTime = System.currentTimeMillis();
-            do {
+            while(taskManager.isActive()) {
                 taskManager.logTimeOnCurrentTask();
 
                 // save the TaskManager to file every 60 seconds
@@ -146,8 +155,14 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
                 } catch(InterruptedException e) {
                     e.printStackTrace();
                 }
-            } while(taskManager.isActive());
+            }
         }
+    }
+
+
+
+    public void setTaskManager(TaskManager inManager) {
+        this.taskManager = inManager;
     }
 
     /**
@@ -187,6 +202,19 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
             channel.setSound(null, null);
             notificationManager.createNotificationChannel(channel);
             notificationBuilder.setChannelId(notificationChannelId);
+
+            this.notificationSound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + this.getApplicationContext().getPackageName() + "/" + R.raw.positive_notification);
+            audioChannelId = "planner_audio_2";
+            NotificationChannel audioChannel = new NotificationChannel(audioChannelId,
+                    "Planner audio alert channel", NotificationManager.IMPORTANCE_DEFAULT);
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .build();
+            audioChannel.enableLights(true);
+            audioChannel.setSound(notificationSound,
+                    audioAttributes);
+            notificationManager.createNotificationChannel(audioChannel);
         }
 
         notificationManager.notify(1, notificationBuilder.build());
@@ -240,9 +268,11 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
         builder.setSmallIcon(android.R.drawable.checkbox_on_background);
         builder.setContentTitle("Current task completed");
         builder.setContentText(taskName);
+        builder.setLights(Color.GREEN, 500, 500);
+        builder.setSound(notificationSound);
 
         if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            builder.setChannelId(notificationChannelId);
+            builder.setChannelId(audioChannelId);
         }
 
         notificationManager.notify(0, builder.build());

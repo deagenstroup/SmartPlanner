@@ -298,18 +298,30 @@ public class ActivityPlannerFragment extends Fragment {
         scheduleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                mainActivity.getDailyPlannerFragment().setDefaultViewMode();
+
+                // Get the adapter for the current task list within the activity planner and create
+                // a ScheduledTask from the selected task
                 TaskListAdapter adapter = ((TaskListAdapter) taskView.getAdapter());
                 ToDoTask task = planner.getActivityPlanner().getActivityCategory(position).getTask(adapter.getSelectedHolderPosition());
                 ScheduledToDoTask scheduledTask = new ScheduledToDoTask(task, Duration.ofMinutes(10L));
+
+                // Switch to the DailyPlanner and add the task to the DailyPlanner, asking
+                // for a specified time for the task
                 mainActivity.switchFragments(mainActivity.getDailyPlannerFragment());
                 mainActivity.tapNavigationButton(0);
                 mainActivity.getDailyPlannerFragment().askForTaskTime(scheduledTask);
-//                mainActivity.getDailyPlannerFragment().changeTaskTime(scheduledTask);
                 planner.addTask(scheduledTask);
+
+                // Ask the user if they would like to remove the task from the activity planner and
+                // update the list the task came from
                 promptToRemoveTask(planner.getActivityPlanner().getActivityCategory(position), adapter.getSelectedHolderPosition());
-//                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
                 adapter.unselectHolder();
                 adapter.notifyDataSetChanged();
+
+                // Update the UI for the current task in the DailyPlanner to reflect the addition
+                // and save the addition to file
                 mainActivity.getDailyPlannerFragment().updateCurrentTask();
                 mainActivity.saveToFile();
             }

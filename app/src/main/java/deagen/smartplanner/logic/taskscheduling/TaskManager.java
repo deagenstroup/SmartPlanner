@@ -29,21 +29,19 @@ public class TaskManager {
 
 	private static final boolean OLD_LOAD_FLAG = false;
 
+
+
 	/**
 	 * The Service which is used to run TaskManager's functionality in the background.
 	 */
 	private TaskManagerService service;
 
+	private DailyPlannerFragment fragment;
+
 	/**
 	 * The ToDoList which is actively being completed by the user.
 	 */
 	private ToDoList list;
-	
-//	/**
-//	 * The time at which the current activity is projected to end if the
-//	 * module is in active mode;
-//	 */
-//	private LocalTime currentActivityEnd;
 	
 	/**
 	 * If true, then the tasks of ToDoList are actively being completed
@@ -58,11 +56,7 @@ public class TaskManager {
 	 */
 	private long startTimeMilli = 0L;
 
-	private DailyPlannerFragment fragment;
-	
-//	public TaskManager() {
-//		list = null;
-//	}
+
 	
 	public TaskManager(ToDoList inList) {
 		this.setToDoList(inList);
@@ -74,9 +68,9 @@ public class TaskManager {
 			this.load(stream);
 	}
 
-	public void setDailyPlannerFragment(DailyPlannerFragment inFragment) {
-		fragment = inFragment;
-	}
+
+
+
 
 	public boolean isActive() {
 		return active;
@@ -95,18 +89,16 @@ public class TaskManager {
 		return list.getCurrentTask();
 	}
 
-//	/**
-//	 * @return The time at which the current activity was started.
-//	 */
-//	public LocalTime getCurrentActivityEnd() {
-//		return currentActivityEnd;
-//	}
+
 
 	public void setToDoList(ToDoList inList) {
 		if(!active)
 			list = inList;
 	}
 
+	public void setDailyPlannerFragment(DailyPlannerFragment inFragment) {
+		fragment = inFragment;
+	}
 
 
 	/**
@@ -130,7 +122,7 @@ public class TaskManager {
 		// if the current task is finished,
 		if(this.getCurrentTask().isFinished()) {
 			// stop the task manager
-			this.stopTasks();
+//			this.stopTasks();
 
 			// notify service that task has finished
 			service.currentTaskFinish();
@@ -185,7 +177,8 @@ public class TaskManager {
 		}
 		fragment = inFragment;
 
-		startTaskManagerService();
+		if(service == null)
+			startTaskManagerService();
 
 		return true;
 	}
@@ -205,6 +198,7 @@ public class TaskManager {
 			@Override
 			public void onServiceDisconnected(ComponentName className) {
 //				Log.d("DEBUG", "TaskManager service has been disconnected.");
+				service = null;
 			}
 		};
 		context.bindService(intent, connection, 0);
@@ -223,6 +217,10 @@ public class TaskManager {
 			}
 		}
 		return false;
+	}
+
+	public void pauseService() {
+		service.setStopFlag(true);
 	}
 
 	public void stopService() {

@@ -61,6 +61,9 @@ public class ScheduledToDoTask extends ToDoTask {
 	public String getTimeRemainingString() {
 		if(allocatedTime == null)
 			return null;
+		else if(allocatedTime.compareTo(timeSpent) < 0) {
+			return "+" + ToDoTask.getTimeText(timeSpent.minus(allocatedTime));
+		}
 		return ToDoTask.getTimeText(this.getTimeRemaining());
 	}
 
@@ -128,5 +131,4 @@ public class ScheduledToDoTask extends ToDoTask {
 		stream.writeObject(allocatedTime);
 		stream.writeObject(timeSpent);
 	}
-	
 }

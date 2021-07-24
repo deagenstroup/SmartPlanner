@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 
 import deagen.smartplanner.R;
-import deagen.smartplanner.fragments.DailyPlannerFragment;
 import deagen.smartplanner.logic.Planner;
 
 /**
@@ -33,6 +32,8 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
      */
     protected SelectionHolder selectedHolder = null;
 
+    protected SelectionHolder clickedHolder = null;
+
     /**
      * A class which represents a single item within the RecyclerView.
      */
@@ -56,32 +57,6 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
 
         // Setting the click handler for the container of an individual holder (item in the list)
         holder.layoutView.setOnClickListener(new HolderListener(holder));
-//        holder.layoutView.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view) {
-//                if(!allowOperations)
-//                    return;
-//
-//                // if this task is already selected, unselect it
-//                if (holder == selectedHolder) {
-//                    doubleClickHolder();
-//                    unselectHolder();
-//                } else {
-//                    // if there is a task selected already, that is different, move selected task to
-//                    // position of the item which was clicked
-//                    if(selectedHolder != null) {
-//                        moveItem(selectedHolder.getAdapterPosition(), holderPosition);
-//                        // reload the items
-//                        notifyDataSetChanged();
-//                        Log.d("SELECTION DEBUG", "deselected position: " + selectedHolder.getAdapterPosition());
-//                        unselectHolder();
-//                    } else {
-//                        // otherwise, simply select this task
-//                        selectHolder(holder);
-//                    }
-//                }
-//            }
-//        });
     }
 
     /**
@@ -93,7 +68,7 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
 
     public void selectHolder(SelectionHolder inHolder) {
         selectedHolder = inHolder;
-        inHolder.layoutView.setBackgroundColor(fragment.getResources().getColor(R.color.green_selected));
+        inHolder.layoutView.setBackgroundColor(fragment.getResources().getColor(R.color.blue_selected));
     }
 
     public SelectionHolder unselectHolder() {
@@ -122,6 +97,11 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
         allowOperations = status;
     }
 
+    public int getMaxTextWidth(SelectionHolder inHolder) {
+        int maxWidth = inHolder.layoutView.getWidth() - 32;
+        return maxWidth;
+    }
+
     /**
      * Handler for the click of a holder in the recyclerview.
      */
@@ -135,6 +115,7 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
 
         @Override
         public void onClick(View view) {
+            clickedHolder = holder;
             int holderPosition = holder.getAdapterPosition();
 
             if(!allowOperations)
@@ -149,10 +130,12 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
                 // position of the item which was clicked
                 if(selectedHolder != null) {
                     moveItem(selectedHolder.getAdapterPosition(), holderPosition);
+
                     // reload the items
                     notifyDataSetChanged();
                     Log.d("SELECTION DEBUG", "deselected position: " + selectedHolder.getAdapterPosition());
                     unselectHolder();
+
                 } else {
                     // otherwise, simply select this task
                     selectHolder(holder);

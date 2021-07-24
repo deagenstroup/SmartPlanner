@@ -1,6 +1,8 @@
 package deagen.smartplanner.ui;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -24,6 +26,14 @@ public class CompletedListAdapter extends ListAdapter {
         holder.task.setText(comTask.getName());
         holder.category.setText(comTask.getCategory());
         holder.time.setText(comTask.getTimeSpentString());
+
+        // Changing the constraints on the time text and category text to be constrained to the
+        // right of the time text
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(holder.layoutView);
+        constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
+        constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
+        constraintSet.applyTo(holder.layoutView);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -39,9 +49,19 @@ public class CompletedListAdapter extends ListAdapter {
     public ListAdapter.ToDoTaskHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
+
+        // Creating a task holder object from the inflated layout
         ListAdapter.ToDoTaskHolder vh = new ListAdapter.ToDoTaskHolder(v);
         vh.layoutView.removeView(vh.layoutView.findViewById(R.id.check_button));
-        vh.layoutView.removeView(vh.layoutView.findViewById(R.id.extend_button));
+
+        // Changing the constraints on the time text and category text to be constrained to the
+        // right of the time text
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(vh.layoutView);
+        constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
+        constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
+        constraintSet.applyTo(vh.layoutView);
+
         return vh;
     }
 }
