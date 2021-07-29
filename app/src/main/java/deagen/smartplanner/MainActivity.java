@@ -1,8 +1,15 @@
 package deagen.smartplanner;
 
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+
+
 import android.content.Context;
 import android.net.Uri;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction ;
 import androidx.appcompat.app.AppCompatActivity;
@@ -80,6 +87,14 @@ public class MainActivity extends AppCompatActivity
         transaction.add(R.id.fragment_container, dailyPlanner);
         transaction.show(dailyPlanner);
         transaction.commit();
+
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(@NonNull InitializationStatus initializationStatus) {
+                Log.d("AdMob", "MobileAds initialization completed.");
+            }
+        });
+
     }
 
     @Override
