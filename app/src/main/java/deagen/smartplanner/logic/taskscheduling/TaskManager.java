@@ -132,6 +132,14 @@ public class TaskManager {
 	public void finishTask() {
 		list.finishCurrentTask();
 	}
+
+	/**
+	 * Complete the task that is at the provided position in the list.
+	 * @param inPos The position, starting from zero, of the task to finish.
+	 */
+	public void finishTask(int inPos) {
+		this.list.finishTask(inPos);
+	}
 	
 	/**
 	 * Puts the planner into an active state, in which the current task is being executed. And the

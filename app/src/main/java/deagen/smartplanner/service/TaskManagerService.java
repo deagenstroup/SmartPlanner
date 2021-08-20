@@ -140,8 +140,6 @@ public class TaskManagerService extends IntentService implements DailyPlannerUse
                     saveTime = System.currentTimeMillis();
                 }
 
-
-
                 this.updateCurrentTask();
 
                 if(stopFlag) {

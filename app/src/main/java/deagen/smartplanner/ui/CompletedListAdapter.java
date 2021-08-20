@@ -33,6 +33,8 @@ public class CompletedListAdapter extends ListAdapter {
         constraintSet.clone(holder.layoutView);
         constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
         constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
+        if(comTask.getTimeSpentString().equals("0:00"))
+            constraintSet.setVisibility(R.id.time_text, ConstraintSet.GONE);
         constraintSet.applyTo(holder.layoutView);
     }
 

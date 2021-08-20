@@ -1,5 +1,7 @@
 package deagen.smartplanner;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity
 
     private Toolbar toolbar;
     private Menu mAppBarMenu;
+    private AdView bannerAd;
     private DailyPlannerFragment dailyPlanner;
     private ActivityPlannerFragment activityPlanner;
     private Planner planner;
@@ -95,6 +98,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        bannerAd = findViewById(R.id.bannerAdView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        bannerAd.loadAd(adRequest);
     }
 
     @Override
@@ -164,10 +170,21 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
         if(fragment instanceof DailyPlannerFragment) {
             ((DailyPlannerFragment) fragment).setBackKeyHandler();
+            setDailyPlannerButtonsVisibility(true);
         }
         else if(fragment instanceof ActivityPlannerFragment) {
             ((ActivityPlannerFragment) fragment).setCategoryViewBackKeyListener();
+            setDailyPlannerButtonsVisibility(false);
         }
+    }
+
+    public void setDailyPlannerButtonsVisibility(boolean visible) {
+        MenuItem dateItem = mAppBarMenu.findItem(R.id.change_date_option);
+        MenuItem breakItem = mAppBarMenu.findItem(R.id.break_option);
+        MenuItem pauseButton = mAppBarMenu.findItem(R.id.task_toggle_option);
+        dateItem.setVisible(visible);
+        breakItem.setVisible(visible);
+        pauseButton.setVisible(visible);
     }
 
     public DailyPlannerFragment getDailyPlannerFragment() {

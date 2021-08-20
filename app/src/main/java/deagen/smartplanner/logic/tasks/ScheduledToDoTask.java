@@ -21,6 +21,8 @@ public class ScheduledToDoTask extends ToDoTask {
 	 */
 	private Duration timeSpent;
 
+
+
 	public ScheduledToDoTask() {
 		this("*task*", "*category*", Duration.ofHours(1L));
 	}
@@ -43,6 +45,8 @@ public class ScheduledToDoTask extends ToDoTask {
 	public ScheduledToDoTask(ObjectInputStream stream) throws ClassNotFoundException, IOException {
 		this.load(stream);
 	}
+
+
 
 	/**
 	 * @return The amount of time remaining for this task if there is a specified time limit. Null
@@ -72,21 +76,6 @@ public class ScheduledToDoTask extends ToDoTask {
 	}
 
 	/**
-	 * @return True if this task does not have a specified timeframe of completion.
-	 */
-	public boolean isUntimedTask() {
-		return this.getTimeRemaining() == null;
-	}
-	
-	public void setAllocatedTime(Duration inTime) {
-		allocatedTime = inTime;
-	}
-
-	public void allocateMoreTime(Duration inTime) {
-		allocatedTime = timeSpent.plus(inTime);
-	}
-
-	/**
 	 * @return True if the specified time limit has been reached for a task, ie. the time spent
 	 * on the task has reached the time allocated for it, false otherwise
 	 */
@@ -95,6 +84,23 @@ public class ScheduledToDoTask extends ToDoTask {
 			return false;
 		}
 		return allocatedTime.compareTo(timeSpent) <= 0;
+	}
+
+	/**
+	 * @return True if this task does not have a specified timeframe of completion.
+	 */
+	public boolean isUntimedTask() {
+		return this.allocatedTime == null;
+	}
+
+
+
+	public void setAllocatedTime(Duration inTime) {
+		allocatedTime = inTime;
+	}
+
+	public void allocateMoreTime(Duration inTime) {
+		allocatedTime = timeSpent.plus(inTime);
 	}
 	
 	/**
@@ -115,7 +121,9 @@ public class ScheduledToDoTask extends ToDoTask {
 	public void cutShortTime(Duration timeCut) {
 		allocatedTime = allocatedTime.minus(timeCut);
 	}
-	
+
+
+
 	public String toString() {
 		return super.toString() + ", " + timeSpent + " of " + allocatedTime;
 	}

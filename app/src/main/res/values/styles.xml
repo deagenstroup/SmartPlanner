@@ -62,4 +62,10 @@
         <item name="android:textColor">@color/faded_grey</item>
     </style>
 
+    <style name="PlannerTitleText" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">@font/mukta</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
 </resources>

@@ -313,5 +313,11 @@ public class Planner {
 //		cat = new ActivityCategory("misc");
 //		activityPlanner.addActivityCategory(cat);
 	}
-	
+
+	public void printScheduledTasks() {
+		ArrayList<ScheduledToDoTask> tasks = this.getScheduledTasks();
+		for(int i = 0; i < tasks.size(); i++) {
+			Log.d("Planner", "i: " + i + " " + tasks.get(i).toString());
+		}
+	}
 }

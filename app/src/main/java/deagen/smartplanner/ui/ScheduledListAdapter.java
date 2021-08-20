@@ -21,8 +21,6 @@ import deagen.smartplanner.logic.tasks.ScheduledToDoTask;
  */
 public class ScheduledListAdapter extends SelectionListAdapter {
 
-    public boolean currentTaskCompleteButtonVisible = false;
-
     public static class ScheduledHolder extends SelectionHolder {
         public TextView task, category, time;
         public ImageButton checkButton;
@@ -34,42 +32,41 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             time = layoutView.findViewById(R.id.time_text);
             checkButton = layoutView.findViewById(R.id.check_button);
         }
-
-        /**
-         * Returns true if the time TextView is currently inside the layoutView container.
-         */
-        public boolean isTimeTextVisible() {
-            return layoutView.findViewById(time.getId()) != null;
-        }
-
-        /**
-         * Adds or removes the time TextView from the layoutView container based on the provided
-         * parameter.
-         */
-        public void toggleTimeTextVisibility(boolean visible) {
-            if(visible && !isTimeTextVisible()) {
-                layoutView.addView(time);
-            } else if(!visible && isTimeTextVisible()) {
-                layoutView.removeView(time);
-            }
-        }
     }
+
+
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public ScheduledListAdapter(Planner inPlanner, DailyPlannerFragment inFragment) {
         super(inPlanner, inFragment);
     }
 
+    // Create new views (invoked by the layout manager)
+    @Override
+    public ScheduledHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        // create a new view
+        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
+        ScheduledHolder vh = new ScheduledHolder(v);
+        this.setCompleteButtonVisible(vh, false);
+        return vh;
+    }
+
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final SelectionHolder holder, int position) {
         super.onBindViewHolder(holder, position);
+
         ScheduledToDoTask schTask = planner.getScheduledTask(position);
         ScheduledHolder scheduledHolder = (ScheduledHolder) holder;
-        if(position == 0 && ((DailyPlannerFragment)fragment).getPlanner().getTaskManager().isActive())
-            holder.layoutView.setBackgroundColor(fragment.getResources().getColor(R.color.blue_selected));
-//        else if(position == 0 && completeButtonVisible)
-//            setCompleteButtonVisible((ScheduledHolder)holder, completeButtonVisible);
+
+        String currentTaskName = planner.getTaskManager().getCurrentTask().getName();
+        Log.d("ScheduledListAdapter", "adapterposition: " + holder.getAdapterPosition() + " position: " + position + " holder text: " + scheduledHolder.task.getText().toString());
+        //if(position == 0 && scheduledHolder.task.getText().toString().equals(currentTaskName)) {
+
+        if(schTask.equals(planner.getTaskManager().getCurrentTask())) {
+            if(((DailyPlannerFragment)fragment).getPlanner().getTaskManager().isActive())
+                holder.layoutView.setBackgroundColor(fragment.getResources().getColor(R.color.blue_selected));
+        }
 
         scheduledHolder.task.setText(schTask.getName());
         scheduledHolder.category.setText(schTask.getCategory());
@@ -79,35 +76,30 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             // If the task has not been worked on yet
             if(schTask.getTimeSpentString().equals("0:00")) {
                 // Remove the time text from the view
-                scheduledHolder.toggleTimeTextVisibility(false);
+                setTimeTextVisible(scheduledHolder, false);
                 // Otherwise if it has been worked on and the view is not currently in the container
             } else {
-                scheduledHolder.toggleTimeTextVisibility(true);
+                setTimeTextVisible(scheduledHolder, true);
                 scheduledHolder.time.setText(schTask.getTimeSpentString());
             }
         } else {
-            scheduledHolder.toggleTimeTextVisibility(true);
+            setTimeTextVisible(scheduledHolder, true);
             scheduledHolder.time.setText(schTask.getTimeRemainingString());
         }
         scheduledHolder.checkButton.setOnClickListener(((DailyPlannerFragment)fragment).getCompleteButtonListener());
-        this.resetTextConstraints((ScheduledHolder)holder);
+//        this.resetTextConstraints((ScheduledHolder)holder);
 //        scheduledHolder.task.setMaxWidth(this.getMaxTextWidth((ScheduledHolder)holder));
     }
 
-    public int getMaxTextWidth(ScheduledHolder inHolder) {
-        return super.getMaxTextWidth(inHolder) - this.getExtraComponentWidth(inHolder);
+    // Return the size of your dataset (invoked by the layout manager)
+    @Override
+    public int getItemCount() {
+        if(planner.getScheduledTasks() == null)
+            return 0;
+        return planner.getScheduledTasks().size();
     }
 
-    public int getExtraComponentWidth(ScheduledHolder inHolder) {
-        int extraWidth = 0;
-        View extraView = inHolder.layoutView.findViewById(R.id.check_button);
-        if(extraView != null)
-            extraWidth += extraView.getWidth();
-        extraView = inHolder.layoutView.findViewById(R.id.time_text);
-        if(extraView != null)
-            extraWidth += extraView.getWidth();
-        return extraWidth + 64;
-    }
+
 
     @Override
     public void selectHolder(SelectionHolder inHolder) {
@@ -142,34 +134,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             }
         });
         dailyFragment.setRemoveButtonsVisible(true);
-    }
-
-    public void setCurrentTaskCompleteButtonVisible(boolean visible) {
-        currentTaskCompleteButtonVisible = visible;
-//        setCompleteButtonVisible();
-    }
-
-    public void setCompleteButtonVisible(ScheduledHolder holder, boolean visible) {
-        if(holder == null)
-            return;
-        if(visible && holder.layoutView.findViewById(R.id.check_button) == null) {
-            holder.layoutView.addView(holder.checkButton);
-        } else if(!visible && holder.layoutView.findViewById(R.id.check_button) != null)
-            holder.layoutView.removeView(holder.checkButton);
-//        this.resetTextConstraints(holder);
-    }
-
-    public void resetTextConstraints(ScheduledHolder holder) {
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(holder.layoutView);
-        if(holder.layoutView.findViewById(R.id.check_button) != null) {
-            constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.check_button, ConstraintSet.START);
-            constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.check_button, ConstraintSet.START);
-        } else {
-            constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
-            constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
-        }
-        constraintSet.applyTo(holder.layoutView);
+        setCompleteButtonVisible( (ScheduledHolder) inHolder, true);
     }
 
     public SelectionHolder unselectHolder() {
@@ -182,6 +147,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             scheduledHolder.category.setOnClickListener(listener);
         }
         ((DailyPlannerFragment) fragment).setRemoveButtonsVisible(false);
+        setCompleteButtonVisible( (ScheduledHolder) returnHolder, false);
         return returnHolder;
     }
 
@@ -192,6 +158,8 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         // move the selected task to this position
         planner.moveScheduledTask(fromPos, toPos);
         ((MainActivity)fragment.getActivity()).saveToFile();
+        planner.printScheduledTasks();
+
     }
 
     public ScheduledToDoTask deleteCurrentItem() {
@@ -202,23 +170,59 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         return task;
     }
 
-
-    // Return the size of your dataset (invoked by the layout manager)
-    @Override
-    public int getItemCount() {
-        if(planner.getScheduledTasks() == null)
-            return 0;
-        return planner.getScheduledTasks().size();
+    /**
+     * Sets a view that is a child of the provided holder, such as the time text or complete button,
+     * to be visible or invisible.
+     * @param holder The ScheduledHolder which contains the child view.
+     * @param viewId The ID of the child view within the ScheduledHolder whose visibility is to be set.
+     * @param visible If true, the child view is set to visible. Otherwise, it is set to be invisible.
+     */
+    public void setChildViewVisiblity(ScheduledHolder holder, int viewId, boolean visible) {
+        if(holder == null)
+            return;
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(holder.layoutView);
+        if(visible) {
+            constraintSet.setVisibility(viewId, ConstraintSet.VISIBLE);
+        } else {
+            constraintSet.setVisibility(viewId, ConstraintSet.GONE);
+        }
+        constraintSet.applyTo(holder.layoutView);
     }
 
-    // Create new views (invoked by the layout manager)
-    @Override
-    public ScheduledHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // create a new view
-        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
-        ScheduledHolder vh = new ScheduledHolder(v);
-        this.setCompleteButtonVisible(vh, false);
-        return vh;
+    public void setTimeTextVisible(ScheduledHolder holder, boolean visible) {
+        setChildViewVisiblity(holder, R.id.time_text, visible);
     }
+
+    public void setCompleteButtonVisible(ScheduledHolder holder, boolean visible) {
+        setChildViewVisiblity(holder, R.id.check_button, visible);
+    }
+
+//    public void resetTextConstraints(ScheduledHolder holder) {
+//        ConstraintSet constraintSet = new ConstraintSet();
+//        constraintSet.clone(holder.layoutView);
+//        if(holder.layoutView.findViewById(R.id.check_button) != null) {
+//            constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.check_button, ConstraintSet.START);
+//            constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.check_button, ConstraintSet.START);
+//        } else {
+//            constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
+//            constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
+//        }
+//        constraintSet.applyTo(holder.layoutView);
+//    }
+//    public int getMaxTextWidth(ScheduledHolder inHolder) {
+//        return super.getMaxTextWidth(inHolder) - this.getExtraComponentWidth(inHolder);
+//    }
+//
+//    public int getExtraComponentWidth(ScheduledHolder inHolder) {
+//        int extraWidth = 0;
+//        View extraView = inHolder.layoutView.findViewById(R.id.check_button);
+//        if(extraView != null)
+//            extraWidth += extraView.getWidth();
+//        extraView = inHolder.layoutView.findViewById(R.id.time_text);
+//        if(extraView != null)
+//            extraWidth += extraView.getWidth();
+//        return extraWidth + 64;
+//    }
 
 }

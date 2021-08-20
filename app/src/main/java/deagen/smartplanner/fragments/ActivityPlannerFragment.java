@@ -329,10 +329,9 @@ public class ActivityPlannerFragment extends Fragment {
     }
 
     public void updateAppBar() {
-        if(selectedCategoryPosition < 0)
-            return;
-
         if(!withinCategoryView) {
+            if(selectedCategoryPosition < 0)
+                return;
             String titleString = planner.getActivityPlanner().getCategories()[selectedCategoryPosition];
             ((MainActivity) getActivity()).getToolbar().setTitle("To-Do: " + titleString);
         } else {

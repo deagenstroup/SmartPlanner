@@ -1,5 +1,7 @@
 package deagen.smartplanner.logic.taskscheduling;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.io.*;
 
@@ -70,9 +72,19 @@ public class ToDoList {
 	 * @return The first task on the list, being worked on currently or to be worked on first
 	 */
 	public ScheduledToDoTask getCurrentTask() {
-		if(this.getScheduledTasks() == null || this.getScheduledTasks().isEmpty())
+		return this.getTask(0);
+	}
+
+	/**
+	 * Get a task from the list.
+	 * @param i Position of the task in the list.
+	 * @return ScheduledToDoTask from the list.
+	 */
+	public ScheduledToDoTask getTask(int i) {
+		if(this.getScheduledTasks() == null || this.getScheduledTasks().isEmpty()
+				|| i < 0 || i >= this.getScheduledTasks().size())
 			return null;
-		return this.getScheduledTasks().get(0);
+		return this.getScheduledTasks().get(i);
 	}
 	
 	public void finishCurrentTask() {
@@ -80,6 +92,24 @@ public class ToDoList {
 			completedTasks = new ArrayList<CompletedToDoTask>();
 		this.completedTasks.add(this.getCurrentTask().finish());
 		this.removeTask(this.getCurrentTask());
+	}
+
+	/**
+	 * Mark a task as completed.
+	 * @param inPos The position, starting from zero, of the task to be finished.
+	 */
+	public void finishTask(int inPos) {
+		if(this.completedTasks == null)
+			this.completedTasks = new ArrayList<CompletedToDoTask>();
+
+		ScheduledToDoTask task = this.getTask(inPos);
+		if(task == null) {
+			Log.d("ERROR - ToDoList", "Unable to retrieve task at provided position.");
+			return;
+		}
+
+		this.completedTasks.add(task.finish());
+		this.removeTask(task);
 	}
 	
 	/**

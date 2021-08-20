@@ -18,7 +18,8 @@ import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,8 +70,6 @@ public class DailyPlannerFragment extends Fragment {
      * looking at the completed tabs
      */
     private boolean scheduledMode = true;
-
-    private boolean completeButtonVisible = false;
 
 
 
@@ -170,6 +169,8 @@ public class DailyPlannerFragment extends Fragment {
         scheduledListView.setHasFixedSize(true);
         scheduledListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         scheduledListView.setAdapter(new ScheduledListAdapter(planner, this));
+
+        ((SimpleItemAnimator) scheduledListView.getItemAnimator()).setSupportsChangeAnimations(false);
 
         // building the container for the list of completed tasks
         completedListView = new RecyclerView(view.findViewById(R.id.list_container).getContext());
@@ -284,9 +285,10 @@ public class DailyPlannerFragment extends Fragment {
     private ImageButton.OnClickListener completeButtonListener = new ImageButton.OnClickListener() {
         @Override
         public void onClick(View v) {
-            setCompleteButtonVisible(false);
-            planner.getTaskManager().finishTask();
-            updateCurrentTask();
+            int selectedPos = getSelectedTaskPosition();
+            getScheduledListAdapter().unselectHolder();
+            planner.getTaskManager().finishTask(selectedPos);
+            getScheduledListAdapter().notifyItemRemoved(selectedPos);
         }
     };
 
@@ -296,6 +298,14 @@ public class DailyPlannerFragment extends Fragment {
 
     public ScheduledListAdapter getScheduledListAdapter() {
         return (ScheduledListAdapter) scheduledListView.getAdapter();
+    }
+
+    public ScheduledListAdapter.ScheduledHolder getCurrentTaskHolder() {
+        return (ScheduledListAdapter.ScheduledHolder) scheduledListView.findViewHolderForAdapterPosition(0);
+    }
+
+    public int getSelectedTaskPosition() {
+        return this.getScheduledListAdapter().getSelectedHolderPosition();
     }
 
     /**
@@ -328,16 +338,14 @@ public class DailyPlannerFragment extends Fragment {
      */
     public void postEndTaskUpdate() {
         // highlighting the new current task
-        setCurrentTaskHighlight(true);
+        //setCurrentTaskHighlight(true);
     }
 
     public void updateCurrentTask() {
-        if(planner.getTaskManager().isActive())
-            setCurrentTaskHighlight(true);
+//        if(planner.getTaskManager().isActive())
+//            setCurrentTaskHighlight(true);
 
-        scheduledListView.getAdapter().notifyDataSetChanged();
-        if(completeButtonVisible)
-            setCompleteButtonVisible(true);
+        scheduledListView.getAdapter().notifyItemChanged(0);
     }
 
 
@@ -403,12 +411,6 @@ public class DailyPlannerFragment extends Fragment {
             toggleActiveMode();
         getScheduledListAdapter().unselectHolder();
         setCurrentTaskHighlight(false);
-
-        // Get GUI container which displays the first task
-        ScheduledListAdapter.ScheduledHolder holder =
-                (ScheduledListAdapter.ScheduledHolder) scheduledListView.findViewHolderForAdapterPosition(0);
-        if(holder != null)
-            getScheduledListAdapter().setCompleteButtonVisible(holder, false);
     }
 
     /**
@@ -418,12 +420,22 @@ public class DailyPlannerFragment extends Fragment {
         if(planner.getTaskManager().isActive()) {
             planner.getTaskManager().stopTasks();
             setUIActiveMode(false);
+            selectCurrentTask();
         } else {
             if(!planner.getTaskManager().startTasks(this))
                 return;
             setUIActiveMode(true);
         }
         ((MainActivity)getActivity()).saveToFile();
+    }
+
+    /**
+     * Selects the task at the top of the current task list.
+     */
+    public void selectCurrentTask() {
+        ScheduledListAdapter adapter = this.getScheduledListAdapter();
+        ScheduledListAdapter.ScheduledHolder holder = this.getCurrentTaskHolder();
+        adapter.selectHolder(holder);
     }
 
     /**
@@ -438,18 +450,15 @@ public class DailyPlannerFragment extends Fragment {
 
         if(activeMode) {
             addButton.hide();
-            ((ScheduledListAdapter)scheduledListView
-                    .getAdapter())
-                    .setAllowOperations(false);
+            this.getScheduledListAdapter().unselectHolder();
+            this.getScheduledListAdapter().setAllowOperations(false);
             setCurrentTaskHighlight(true);
-            setCompleteButtonVisible(false);
         } else {
             addButton.show();
             ((ScheduledListAdapter)scheduledListView
                     .getAdapter())
                     .setAllowOperations(true);
             setCurrentTaskHighlight(false);
-            setCompleteButtonVisible(true);
             showCurrentTaskTime(true);
         }
     }
@@ -524,37 +533,15 @@ public class DailyPlannerFragment extends Fragment {
         });
     }
 
-    public void setCompleteButtonVisible(boolean visible) {
-        ScheduledListAdapter adapter = this.getScheduledListAdapter();
-        if(adapter != null) {
-            ScheduledListAdapter.ScheduledHolder holder = (ScheduledListAdapter.ScheduledHolder) this.scheduledListView.findViewHolderForAdapterPosition(0);
-            adapter.setCompleteButtonVisible(holder, visible);
-            completeButtonVisible = visible;
-//            adapter.notifyItemChanged(0);
-        }
-
-//        if(completeButton != null) {
-//            if(visible) {
-//                completeButton.show();
-//            } else {
-//                completeButton.hide();
-//            }
-//        }
-
-//        if(visible)
-//            showCurrentTaskTime(false);
-//        else
-//            showCurrentTaskTime(true);
-    }
-
     /**
      * Sets the task at the top of the current list to be highlighted or not
      * @param highlight If true, task is hightlighted green
      */
     public void setCurrentTaskHighlight(boolean highlight) {
-        ScheduledListAdapter.ScheduledHolder holder = (ScheduledListAdapter.ScheduledHolder) scheduledListView.findViewHolderForAdapterPosition(0);
+        ScheduledListAdapter.ScheduledHolder holder = this.getCurrentTaskHolder();
         if(holder == null)
             return;
+
         if(!highlight) {
             holder.layoutView.setBackgroundColor(Color.TRANSPARENT);
         } else {
