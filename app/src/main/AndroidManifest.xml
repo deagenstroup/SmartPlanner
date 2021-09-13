@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="deagen.smartplanner">
-
+    package="com.deagenstroup.agendaassistant">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <application
         android:allowBackup="true"
-        android:icon="@drawable/to_do_list"
+        android:icon="@mipmap/to_do_list_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/to_do_list_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <receiver
+            android:name="com.deagenstroup.agendaassistant.service.TaskAlarmReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
+
         <service
-            android:name=".MyIntentService"
-            android:exported="false"></service>
-        <service
-            android:name="deagen.smartplanner.service.TaskManagerService"
-            android:exported="false" />
+            android:name="com.deagenstroup.agendaassistant.service.TaskManagerService"
+            android:exported="true" />
 
         <activity
-            android:name="deagen.smartplanner.MainActivity"
+            android:name="com.deagenstroup.agendaassistant.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,7 +30,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-7446783952765744~8896349916"/>
+            android:value="ca-app-pub-7446783952765744~8896349916" />
     </application>
 
 </manifest>

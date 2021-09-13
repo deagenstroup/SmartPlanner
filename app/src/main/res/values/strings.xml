@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartPlanner</string>
+    <string name="app_name">AgendaAssist</string>
 
     <string name="dailyplanner_appbar_title">DD/MM/YYYY</string>
 
@@ -27,4 +27,5 @@
     <string name="category_text">*category*</string>
     <string name="total_time_text">Total Time Tracked:</string>
     <string name="average_time_text">Average Task Length:</string>
+    <string name="help_button_text">Help/Tutorial</string>
 </resources>

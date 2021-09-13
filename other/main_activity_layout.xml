@@ -15,7 +15,7 @@
 
         <fragment
             android:id="@+id/planner_fragment"
-            android:name="deagen.smartplanner.fragments.DailyPlannerFragment"
+            android:name="com.deagenstroup.agendaassistant.fragments.DailyPlannerFragment"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" />
     </TableRow>

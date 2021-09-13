@@ -13,12 +13,18 @@
         android:orderInCategory="20"
         android:title="@string/date_option_title"
         app:maxImageSize="48dp"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/break_option"
         android:icon="@drawable/ic_cup_vec"
-        android:orderInCategory="20"
+        android:orderInCategory="30"
         android:title="@string/break_option_title"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/help_button"
+        android:icon="@drawable/ic_baseline_help_24_vec"
+        android:orderInCategory="30"
+        android:title="@string/help_button_text"
         app:showAsAction="ifRoom" />
 
 </menu>
