@@ -12,6 +12,8 @@ import android.icu.util.Calendar;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.deagenstroup.agendaassistant.logic.taskplanning.ActivityCategory;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
@@ -31,6 +33,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 
@@ -208,13 +211,7 @@ public class DailyPlannerFragment extends Fragment {
         // adding a handler for the "delete a task" button in the bottom right, and initializing
         // it to be invisible
         deleteButton = view.findViewById(R.id.dailyplanner_delete_button);
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                removeCurrentTask(true);
-                setDefaultViewMode();
-            }
-        });
+        deleteButton.setOnClickListener(deleteButtonListener);
 
         revertTaskButton = view.findViewById(R.id.dailyplanner_revert_button);
         revertTaskButton.setOnClickListener(new View.OnClickListener() {
@@ -276,6 +273,22 @@ public class DailyPlannerFragment extends Fragment {
     }
 
 
+    /**
+     * Handler which executes when a user presses the delete button.
+     */
+    private View.OnClickListener deleteButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MainActivity.showConfirmationDialog("Are you sure you would like to delete the current task?",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            removeCurrentTask(true);
+                            setDefaultViewMode();
+                        }
+                    }, getContext());
+        }
+    };
 
     /**
      * The handler which is attached to each of the check buttons inside each viewholder of the
@@ -284,10 +297,17 @@ public class DailyPlannerFragment extends Fragment {
     private ImageButton.OnClickListener completeButtonListener = new ImageButton.OnClickListener() {
         @Override
         public void onClick(View v) {
-            int selectedPos = getSelectedTaskPosition();
-            getScheduledListAdapter().unselectHolder();
-            planner.getTaskManager().finishTask(selectedPos);
-            getScheduledListAdapter().notifyItemRemoved(selectedPos);
+            ScheduledToDoTask currentTask = planner.getTaskManager().getCurrentTask();
+            MainActivity.showConfirmationDialog("Are you sure you would like to complete \""
+                    + currentTask.getName() + "\"?", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    int selectedPos = getSelectedTaskPosition();
+                    getScheduledListAdapter().unselectHolder();
+                    planner.getTaskManager().finishTask(selectedPos);
+                    getScheduledListAdapter().notifyItemRemoved(selectedPos);
+                }
+            }, getContext());
         }
     };
 
@@ -569,6 +589,8 @@ public class DailyPlannerFragment extends Fragment {
 
     // dialog methods for task manipulation
 
+
+
     /**
      * Prompt the user for a dialog to change the name of the task provided.
      * @param inTask
@@ -577,6 +599,9 @@ public class DailyPlannerFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
         builder.setTitle("Input task name: ");
         final EditText input = new EditText(builder.getContext());
+        if(inTask.getName() != null)
+            input.setText(inTask.getName(), TextView.BufferType.EDITABLE);
+        input.selectAll();
         builder.setView(input);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
             @Override
@@ -664,8 +689,8 @@ public class DailyPlannerFragment extends Fragment {
                 new TimePickerDialog(this.getContext(),
                                     TimePickerDialog.THEME_HOLO_LIGHT,
                                     listener,
-                                    0,
-                                    0,
+                                    (int)inTask.getTimeRemaining().toHours(),
+                                    (int)(inTask.getTimeRemaining().toMinutes() % 60),
                          true);
         timePickerDialog.setTitle("Choose allocated time:");
         timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);

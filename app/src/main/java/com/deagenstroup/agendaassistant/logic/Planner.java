@@ -279,12 +279,12 @@ public class Planner {
 		list.addScheduledTask(new ScheduledToDoTask("move trash bins", "misc", null));
 		list.addScheduledTask(new ScheduledToDoTask("go for a run", "exercise", null));
 
-		list.addCompletedTask(new CompletedToDoTask("study for Calculus final", "school", Duration.ofMinutes(90L)));
-		list.addCompletedTask(new CompletedToDoTask("finish physics lab", "school", Duration.ofMinutes(16L).plusSeconds(24L)));
-		list.addCompletedTask(new CompletedToDoTask("go to the grocery store", "shopping", Duration.ofMinutes(84L).plusSeconds(47L)));
-		list.addCompletedTask(new CompletedToDoTask("practice piano", "music", Duration.ofMinutes(20L)));
-		list.addCompletedTask(new CompletedToDoTask("move trash bins", "misc", Duration.ofMinutes(0L)));
-		list.addCompletedTask(new CompletedToDoTask("go for a run", "exercise", Duration.ofMinutes(18L).plusSeconds(25L)));
+//		list.addCompletedTask(new CompletedToDoTask("study for Calculus final", "school", Duration.ofMinutes(90L)));
+//		list.addCompletedTask(new CompletedToDoTask("finish physics lab", "school", Duration.ofMinutes(16L).plusSeconds(24L)));
+//		list.addCompletedTask(new CompletedToDoTask("go to the grocery store", "shopping", Duration.ofMinutes(84L).plusSeconds(47L)));
+//		list.addCompletedTask(new CompletedToDoTask("practice piano", "music", Duration.ofMinutes(20L)));
+//		list.addCompletedTask(new CompletedToDoTask("move trash bins", "misc", Duration.ofMinutes(0L)));
+//		list.addCompletedTask(new CompletedToDoTask("go for a run", "exercise", Duration.ofMinutes(18L).plusSeconds(25L)));
 
 
 
@@ -315,10 +315,10 @@ public class Planner {
 //		list.addCompletedTask(new CompletedToDoTask("read Neuromancer", "reading", Duration.ofHours(2L)));
 //		calendar.addToDoList(list, LocalDate.of(2019, 8, 1));
 
-		ActivityCategory cat = new ActivityCategory("schoolwork");
-		cat.addToDoTask(new ToDoTask("do physics lab", "schoolwork"));
-		cat.addToDoTask(new ToDoTask("finish AI project", "schoolwork"));
-		cat.addToDoTask(new ToDoTask("study for calculus final", "schoolwork"));
+		ActivityCategory cat = new ActivityCategory("school");
+		cat.addToDoTask(new ToDoTask("do physics lab", "school"));
+		cat.addToDoTask(new ToDoTask("finish AI project", "school"));
+		cat.addToDoTask(new ToDoTask("study for calculus final", "school"));
 		activityPlanner.addActivityCategory(cat);
 
 		cat = new ActivityCategory("shopping");

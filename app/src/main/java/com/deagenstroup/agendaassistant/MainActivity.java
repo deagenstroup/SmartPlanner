@@ -7,8 +7,10 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -49,9 +51,10 @@ public class MainActivity extends AppCompatActivity
     /**
      * The filename used to save the data of the planner
      */
-    private static String mainFileName = "plannerfile.dat";
-    public static boolean ADS_ENABLED = true;
+
+    public static boolean ADS_ENABLED = false;
     public static boolean TESTING = false;
+    private static String mainFileName = (TESTING ? "testingfile.dat" : "plannerfile.dat");
 
     private Toolbar toolbar;
     private Menu mAppBarMenu;
@@ -289,6 +292,8 @@ public class MainActivity extends AppCompatActivity
     //file I/O methods
 
     public void saveToFile() {
+        if(TESTING)
+            return;
         try {
             ObjectOutputStream stream =
                     new ObjectOutputStream(getApplicationContext().openFileOutput(mainFileName, Context.MODE_PRIVATE));
@@ -314,6 +319,30 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
+    /**
+     * Prompts the user to ask if they are sure they would like to do the specified action.
+     * @param displayMessage The text to display to the user in the dialog.
+     * @param positiveCallback Callback function that is executed upon user hitting yes.
+     */
+    public static void showConfirmationDialog(String displayMessage,
+                                       DialogInterface.OnClickListener positiveCallback,
+                                       Context context) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        dialogBuilder.setTitle(displayMessage);
+
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        if(positiveCallback != null)
+            dialogBuilder.setPositiveButton("YES", positiveCallback);
+
+        dialogBuilder.show();
+    }
 
 
     public static void watchYoutubeVideo(Context context, String id){

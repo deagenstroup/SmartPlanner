@@ -207,7 +207,6 @@ public class ActivityPlannerFragment extends Fragment {
 
         // setting the listeners for the add and delete buttons
         addButton.setOnClickListener(addCategoryListener);
-
         deleteButton.setOnClickListener(deleteCategoryListener);
     }
 
@@ -286,12 +285,24 @@ public class ActivityPlannerFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // unselecting the selected task and removing from the planner
-                TaskListAdapter adapter = ((TaskListAdapter)taskView.getAdapter());
-                planner.getActivityPlanner().getActivityCategory(position).removeTask(adapter.getSelectedHolderPosition());
-                adapter.unselectHolder();
-                adapter.notifyDataSetChanged();
-                mainActivity.saveToFile();
+                final TaskListAdapter adapter = ((TaskListAdapter)taskView.getAdapter());
+                String taskName = getSelectedActivityCategory()
+                                         .getTask(adapter.getSelectedHolderPosition())
+                                         .getName();
+                MainActivity.showConfirmationDialog(
+                        "Are you sure you would like to task \"" + taskName + "\"?",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // unselecting the selected task and removing from the planner
+                                getSelectedActivityCategory().removeTask(adapter.getSelectedHolderPosition());
+                                adapter.unselectHolder();
+                                adapter.notifyDataSetChanged();
+                                mainActivity.saveToFile();
+                            }
+                        },
+                        getContext());
+
             }
         });
         scheduleButton.setOnClickListener(new View.OnClickListener() {
@@ -382,11 +393,21 @@ public class ActivityPlannerFragment extends Fragment {
     private FloatingActionButton.OnClickListener deleteCategoryListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            CategoryListAdapter adapter = ((CategoryListAdapter)categoryView.getAdapter());
-            int removePosition = selectedCategoryPosition;
-            adapter.unselectHolder();
-            planner.getActivityPlanner().removeActivityCategory(removePosition);
-            adapter.notifyDataSetChanged();
+            MainActivity.showConfirmationDialog(
+                    "Are you sure you would like to delete category \""
+                            + planner.getActivityPlanner().getActivityCategory(selectedCategoryPosition).getName()
+                            + "\"?",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    CategoryListAdapter adapter = ((CategoryListAdapter)categoryView.getAdapter());
+                                    int removePosition = selectedCategoryPosition;
+                                    adapter.unselectHolder();
+                                    planner.getActivityPlanner().removeActivityCategory(removePosition);
+                                    adapter.notifyDataSetChanged();
+                                }
+                            },
+                            getContext());
         }
     };
 

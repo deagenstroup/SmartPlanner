@@ -22,7 +22,7 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
     protected Planner planner;
 
     /**
-     * If set to true, they then selection and holder moving operations are performed. If set to false,
+     * If set to true, then selection and holder moving operations are performed. If set to false,
      * no selection or holder moving operations are performed.
      */
     protected boolean allowOperations = true;
@@ -37,8 +37,6 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
      */
     protected SelectionHolder clickedHolder = null;
 
-    protected View.OnLongClickListener onLongClickListener = null;
-
     /**
      * A class which represents a single item within the RecyclerView.
      */
@@ -51,6 +49,8 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
         }
     }
 
+    private HolderListener holderListener;
+
     /**
      * Handler for the click of a holder in the recyclerview.
      */
@@ -59,7 +59,7 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
         /**
          * The SelectionHolder which this listener belongs to.
          */
-        private SelectionHolder holder;
+        protected SelectionHolder holder;
 
         public HolderListener(SelectionHolder inHolder) {
             holder = inHolder;
@@ -103,17 +103,17 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
     public SelectionListAdapter(Planner inPlanner, Fragment inFragment) {
         planner = inPlanner;
         fragment = inFragment;
+
+
     }
 
     @Override
     public void onBindViewHolder(final SelectionHolder holder, int position) {
         // Setting the click handler for the container of an individual holder (item in the list)
         HolderListener listener = new HolderListener(holder);
-        onLongClickListener = listener;
         holder.layoutView.setOnClickListener(listener);
         holder.layoutView.setOnLongClickListener(listener);
     }
-
 
     /**
      * Called when a selected holder is clicked again. Used by category view holder.

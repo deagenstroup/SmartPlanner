@@ -3,6 +3,7 @@ package com.deagenstroup.agendaassistant.ui;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import android.media.Image;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
 
     public static class ScheduledHolder extends SelectionHolder {
         public TextView task, category, time;
-        public ImageButton checkButton;
+        public ImageButton checkButton, deselectButton;
         public ScheduledHolder(ConstraintLayout inLayout) {
             super(inLayout);
             layoutView = inLayout;
@@ -31,10 +32,47 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             category = layoutView.findViewById(R.id.category_text);
             time = layoutView.findViewById(R.id.time_text);
             checkButton = layoutView.findViewById(R.id.check_button);
+            deselectButton = layoutView.findViewById(R.id.deselect_button);
         }
     }
 
+    protected class ScheduledHolderListener extends SelectionListAdapter.HolderListener {
 
+        public ScheduledHolderListener(ScheduledHolder inHolder) {
+            super(inHolder);
+        }
+
+        @Override
+        public void onClick(View view) {
+            clickedHolder = this.holder;
+            if (!allowOperations)
+                return;
+
+            if(selectedHolder == clickedHolder) {
+                unselectHolder();
+            }
+            // If there is a task selected already, that is different, move selected task to
+            // position of the item which was clicked.
+            else if(selectedHolder != null) {
+                moveItem(selectedHolder.getAdapterPosition(), holder.getAdapterPosition());
+
+                // reload the items
+                notifyDataSetChanged();
+                unselectHolder();
+            }
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            if(!allowOperations)
+                return true;
+            if(this.holder == selectedHolder)
+                unselectHolder();
+            else
+                selectHolder(this.holder);
+            return true;
+        }
+    }
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public ScheduledListAdapter(Planner inPlanner, DailyPlannerFragment inFragment) {
@@ -54,7 +92,10 @@ public class ScheduledListAdapter extends SelectionListAdapter {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final SelectionHolder holder, int position) {
-        super.onBindViewHolder(holder, position);
+        // Setting the click handler for the container of an individual holder (item in the list)
+        ScheduledHolderListener listener = new ScheduledHolderListener((ScheduledHolder)holder);
+        holder.layoutView.setOnClickListener(listener);
+        holder.layoutView.setOnLongClickListener(listener);
 
         ScheduledToDoTask schTask = planner.getScheduledTask(position);
         ScheduledHolder scheduledHolder = (ScheduledHolder) holder;
@@ -86,9 +127,11 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             setTimeTextVisible(scheduledHolder, true);
             scheduledHolder.time.setText(schTask.getTimeRemainingString());
         }
+
+
+
         scheduledHolder.checkButton.setOnClickListener(((DailyPlannerFragment)fragment).getCompleteButtonListener());
-//        this.resetTextConstraints((ScheduledHolder)holder);
-//        scheduledHolder.task.setMaxWidth(this.getMaxTextWidth((ScheduledHolder)holder));
+        scheduledHolder.deselectButton.setOnClickListener(deselectHandler);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -100,6 +143,13 @@ public class ScheduledListAdapter extends SelectionListAdapter {
     }
 
 
+
+    private ImageButton.OnClickListener deselectHandler = new ImageButton.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            unselectHolder();
+        }
+    };
 
     @Override
     public void selectHolder(SelectionHolder inHolder) {
@@ -133,18 +183,19 @@ public class ScheduledListAdapter extends SelectionListAdapter {
                 Log.d("CLICK DEBUG", "You have clicked the time text");
             }
         });
-        View.OnLongClickListener listener = new HolderListener(inHolder);
+        View.OnLongClickListener listener = new ScheduledHolderListener((ScheduledHolder)inHolder);
         scheduledHolder.task.setOnLongClickListener(listener);
         scheduledHolder.category.setOnLongClickListener(listener);
         scheduledHolder.time.setOnLongClickListener(listener);
         dailyFragment.setRemoveButtonsVisible(true);
         setCompleteButtonVisible( (ScheduledHolder) inHolder, true);
+        setChildViewVisiblity( (ScheduledHolder) inHolder, R.id.deselect_button, true);
     }
 
     public SelectionHolder unselectHolder() {
         SelectionHolder returnHolder = super.unselectHolder();
         if(returnHolder != null) {
-            HolderListener listener = new HolderListener(returnHolder);
+            ScheduledHolderListener listener = new ScheduledHolderListener((ScheduledHolder)returnHolder);
             ScheduledHolder scheduledHolder = (ScheduledHolder) returnHolder;
             scheduledHolder.task.setOnClickListener(listener);
             scheduledHolder.time.setOnClickListener(listener);
@@ -152,6 +203,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         }
         ((DailyPlannerFragment) fragment).setRemoveButtonsVisible(false);
         setCompleteButtonVisible( (ScheduledHolder) returnHolder, false);
+        setChildViewVisiblity( (ScheduledHolder) returnHolder, R.id.deselect_button, false);
         return returnHolder;
     }
 

@@ -65,7 +65,14 @@
         android:src="@drawable/ic_revert"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/dailyplanner_delete_button"
-        app:maxImageSize="32dp"
-        tools:layout_editor_absoluteX="267dp" />
+        app:maxImageSize="32dp" />
+
+    <!--<com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/dailyplanner_deselect_button"
+        style="@style/BottomFloatingButton"
+        android:src="@drawable/ic_vec_x"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/dailyplanner_revert_button"
+        app:maxImageSize="38dp" /> -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
