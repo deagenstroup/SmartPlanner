@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Colors used in the toolbar, bottom navigation view, and any other
+         UI components outside of the main content window, ie. "fragment_container" FrameLayout. -->
+
+    <!-- Main color of text and icons. -->
+    <attr name="myPriForeColor" format="reference|color"/>
+
+    <!-- Color of currently unselected icons and less important foreground components !-->
+    <attr name="mySecForeColor" format="reference|color"/>
+
+    <!-- Background color of toolbar, navigation view, and any other components outside of the
+         main content -->
+    <attr name="myPriBackColor" format="reference|color"/>
+
+
+
+    <!-- Colors used by the text, tabs, and any other component inside the main content window. -->
+
+    <!-- Main color of text and tabs -->
+    <attr name="myConPriForeColor" format="reference|color"/>
+
+    <!-- Color of task subtext, unselected tabs, and other less important UI components. -->
+    <attr name="myConSecForeColor" format="reference|color"/>
+
+    <!-- Background color of the main content window. -->
+    <attr name="myConPriBackColor" format="reference|color"/>
+
+    <!-- Color of dividing lines between tasks and other subtle background markers -->
+    <attr name="myConSecBackColor" format="reference|color"/>
+
+    <!-- Used to highlight tasks. -->
+    <attr name="myConHighColor" format="reference|color"/>
+
+</resources>

@@ -3,7 +3,6 @@ package com.deagenstroup.agendaassistant.ui;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import android.media.Image;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,7 +82,7 @@ public class ScheduledListAdapter extends SelectionListAdapter {
     @Override
     public ScheduledHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
+        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.scheduled_task_container, parent, false);
         ScheduledHolder vh = new ScheduledHolder(v);
         this.setCompleteButtonVisible(vh, false);
         return vh;
@@ -106,7 +105,8 @@ public class ScheduledListAdapter extends SelectionListAdapter {
 
         if(schTask.equals(planner.getTaskManager().getCurrentTask())) {
             if(((DailyPlannerFragment)fragment).getPlanner().getTaskManager().isActive())
-                holder.layoutView.setBackgroundColor(fragment.getResources().getColor(R.color.blue_selected));
+                SelectionListAdapter.setHolderHighlight(holder, true, fragment.getContext());
+                //holder.layoutView.setBackgroundColor(SelectionListAdapter.getHighlightColor(fragment.getContext()));
         }
 
         scheduledHolder.task.setText(schTask.getName());
@@ -188,8 +188,8 @@ public class ScheduledListAdapter extends SelectionListAdapter {
         scheduledHolder.category.setOnLongClickListener(listener);
         scheduledHolder.time.setOnLongClickListener(listener);
         dailyFragment.setRemoveButtonsVisible(true);
-        setCompleteButtonVisible( (ScheduledHolder) inHolder, true);
-        setChildViewVisiblity( (ScheduledHolder) inHolder, R.id.deselect_button, true);
+        setChildViewVisiblity( inHolder.taskContainer, R.id.check_button, true);
+        setChildViewVisiblity( inHolder.layoutView, R.id.deselect_button, true);
     }
 
     public SelectionHolder unselectHolder() {
@@ -200,10 +200,11 @@ public class ScheduledListAdapter extends SelectionListAdapter {
             scheduledHolder.task.setOnClickListener(listener);
             scheduledHolder.time.setOnClickListener(listener);
             scheduledHolder.category.setOnClickListener(listener);
+            setChildViewVisiblity( returnHolder.taskContainer, R.id.check_button, false);
+            setChildViewVisiblity( returnHolder.layoutView, R.id.deselect_button, false);
         }
         ((DailyPlannerFragment) fragment).setRemoveButtonsVisible(false);
-        setCompleteButtonVisible( (ScheduledHolder) returnHolder, false);
-        setChildViewVisiblity( (ScheduledHolder) returnHolder, R.id.deselect_button, false);
+
         return returnHolder;
     }
 
@@ -233,25 +234,25 @@ public class ScheduledListAdapter extends SelectionListAdapter {
      * @param viewId The ID of the child view within the ScheduledHolder whose visibility is to be set.
      * @param visible If true, the child view is set to visible. Otherwise, it is set to be invisible.
      */
-    public void setChildViewVisiblity(ScheduledHolder holder, int viewId, boolean visible) {
+    public void setChildViewVisiblity(ConstraintLayout holder, int viewId, boolean visible) {
         if(holder == null)
             return;
         ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(holder.layoutView);
+        constraintSet.clone(holder);
         if(visible) {
             constraintSet.setVisibility(viewId, ConstraintSet.VISIBLE);
         } else {
             constraintSet.setVisibility(viewId, ConstraintSet.GONE);
         }
-        constraintSet.applyTo(holder.layoutView);
+        constraintSet.applyTo(holder);
     }
 
     public void setTimeTextVisible(ScheduledHolder holder, boolean visible) {
-        setChildViewVisiblity(holder, R.id.time_text, visible);
+        setChildViewVisiblity(holder.taskContainer, R.id.time_text, visible);
     }
 
     public void setCompleteButtonVisible(ScheduledHolder holder, boolean visible) {
-        setChildViewVisiblity(holder, R.id.check_button, visible);
+        setChildViewVisiblity(holder.taskContainer, R.id.check_button, visible);
     }
 
 }

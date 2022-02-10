@@ -135,11 +135,11 @@ public class MainActivity extends AppCompatActivity
     public void updateToggleButtonImage() {
         if(planner.getTaskManager().isActive())
             mAppBarMenu.findItem(R.id.task_toggle_option)
-                .setIcon(android.R.drawable.ic_media_pause);
+                .setIcon(R.drawable.ic_round_pause);
         else {
             getAppBarMenu()
                     .findItem(R.id.task_toggle_option)
-                    .setIcon(android.R.drawable.ic_media_play);
+                    .setIcon(R.drawable.ic_round_arrow);
         }
     }
 

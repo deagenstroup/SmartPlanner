@@ -1,10 +1,13 @@
 package com.deagenstroup.agendaassistant.ui;
 
+import android.content.Context;
 import android.graphics.Color;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.drawable.GradientDrawable;
+import android.util.TypedValue;
 import android.view.View;
 
 import com.deagenstroup.agendaassistant.R;
@@ -41,11 +44,12 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
      * A class which represents a single item within the RecyclerView.
      */
     public static class SelectionHolder extends RecyclerView.ViewHolder {
-        public ConstraintLayout layoutView;
+        public ConstraintLayout layoutView, taskContainer;
 
         public SelectionHolder(ConstraintLayout inView) {
             super(inView);
             layoutView = inView;
+            taskContainer = layoutView.findViewById(R.id.task_container);
         }
     }
 
@@ -131,7 +135,7 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
 
     public void selectHolder(SelectionHolder inHolder) {
         selectedHolder = inHolder;
-        inHolder.layoutView.setBackgroundColor(fragment.getResources().getColor(R.color.blue_selected));
+        setHolderHighlight(selectedHolder, true, fragment.getContext());
     }
 
     /**
@@ -141,8 +145,7 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
     public SelectionHolder unselectHolder() {
         SelectionHolder returnHolder = selectedHolder;
         if(selectedHolder != null) {
-            selectedHolder.layoutView.setBackgroundColor(Color.TRANSPARENT);
-//            selectedHolder.layoutView.setOnClickListener(new HolderListener(selectedHolder));
+            setHolderHighlight(selectedHolder, false, fragment.getContext());
             selectedHolder = null;
         }
         return returnHolder;
@@ -158,6 +161,22 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
 
     public void setAllowOperations(boolean status) {
         allowOperations = status;
+    }
+
+    public static void setHolderHighlight(SelectionHolder inHolder, boolean hightlight, Context context) {
+        if(hightlight) {
+            inHolder.taskContainer.setBackgroundResource(R.drawable.task_background);
+            GradientDrawable drawable = (GradientDrawable) inHolder.taskContainer.getBackground();
+            drawable.setColor(getHighlightColor(context));
+        } else {
+            inHolder.taskContainer.setBackgroundColor(Color.TRANSPARENT);
+        }
+    }
+
+    public static int getHighlightColor (final Context context) {
+        final TypedValue value = new TypedValue();
+        context.getTheme ().resolveAttribute (R.attr.myConHighColor, value, true);
+        return value.data;
     }
 
 }

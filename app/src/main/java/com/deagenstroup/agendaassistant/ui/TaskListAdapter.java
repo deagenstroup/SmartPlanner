@@ -57,7 +57,7 @@ public class TaskListAdapter extends SelectionListAdapter {
     @Override
     public TaskHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.activityplanner_task_holder, parent, false);
+        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
         TaskHolder vh = new TaskHolder(v);
         return vh;
     }

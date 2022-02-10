@@ -3,10 +3,39 @@
     <color name="colorPrimary">#254AD5</color>
     <color name="colorPrimaryDark">#0027B9</color>
     <color name="colorAccent">#D81B60</color>
-    <color name="white">#FFFFFF</color>
     <color name="blue_selected">#7894ff</color>
     <color name="background_color">#DFDFDF</color>
-    <color name="black">#111217</color>
     <color name="faded_grey">#4f5054</color>
     <color name="light_grey">#bdbdbd</color>
+
+    <color name="textbook_darkblue">#0027B9</color>
+    <color name="textbook_lightblue">#254AD5</color>
+    <color name="textbook_softblue">#7894ff</color>
+    <color name="textbook_offwhite">#DFDFDF</color>
+    <color name="textbook_fadedgrey">#4f5054</color>
+    <color name="textbook_lightgrey">#bdbdbd</color>
+
+    <color name="cleanblues_dark">#5680E9</color>
+    <color name="cleanblues_light">#84CEEB</color>
+    <color name="cleanblues_soft">#5AB9EA</color>
+    <color name="cleanblues_background">#C1C8E4</color>
+    <color name="cleanblues_accent">#8860D0</color>
+
+    <color name="modern_darker">#17252A</color>
+    <color name="modern_dark">#2B7A78</color>
+    <color name="modern_soft">#3AAFA9</color>
+    <color name="modern_light">#DEF2F1</color>
+    <color name="modern_lighter">#FEFFFF</color>
+
+    <color name="refreshing_darker">#25274D</color>
+    <color name="refreshing_dark">#464866</color>
+    <color name="refreshing_lighter">#AAABB8</color>
+    <color name="refreshing_light">#2E9CCA</color>
+    <color name="refreshing_soft">#29648A</color>
+
+    <color name="stylish_darkgrey">#101010</color>
+    <color name="stylish_lightgrey">#1E2229</color>
+    <color name="stylish_lightblue">#3C87BD</color>
+    <color name="stylish_darkblue">#465273</color>
+    <color name="stylish_brown">#B1A296</color>
 </resources>

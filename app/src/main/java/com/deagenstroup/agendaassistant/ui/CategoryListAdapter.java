@@ -61,7 +61,7 @@ public class CategoryListAdapter extends SelectionListAdapter {
     @Override
     public CategoryHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.activityplanner_category_holder, parent, false);
+        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.category_container, parent, false);
         CategoryHolder vh = new CategoryHolder(v);
         return vh;
     }

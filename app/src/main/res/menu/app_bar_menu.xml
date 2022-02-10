@@ -4,7 +4,7 @@
     <item
         android:id="@+id/task_toggle_option"
         android:title="@string/task_toggle_option_title"
-        android:icon="@android:drawable/ic_media_play"
+        android:icon="@drawable/ic_round_arrow"
         android:orderInCategory="10"
         app:showAsAction="always" />
     <item
@@ -22,7 +22,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/help_button"
-        android:icon="@drawable/ic_baseline_help_24_vec"
+        android:icon="@drawable/ic_questionmark"
         android:orderInCategory="30"
         android:title="@string/help_button_text"
         app:showAsAction="ifRoom" />

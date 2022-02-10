@@ -1,71 +1,141 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
+    <style name="DefaultAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="myPriForeColor">@android:color/white</item>
+        <item name="mySecForeColor">@android:color/black</item>
+        <item name="myPriBackColor">@color/textbook_darkblue</item>
 
-    <style name="AppTheme.NoActionBar">
+        <item name="myConPriForeColor">@android:color/black</item>
+        <item name="myConSecForeColor">@color/faded_grey</item>
+        <item name="myConPriBackColor">@color/textbook_offwhite</item>
+        <item name="myConSecBackColor">@color/textbook_lightgrey</item>
+
+        <item name="myConHighColor">@color/textbook_softblue</item>
+
+        <item name="colorPrimary">?attr/myPriBackColor</item>
+        <item name="colorPrimaryDark">?attr/myPriBackColor</item>
+        <item name="colorAccent">?attr/myConHighColor</item>
+        <item name="android:textColorSecondary">?attr/myPriForeColor</item>
+        <item name="android:windowBackground">?attr/myConPriBackColor</item>
+
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="CleanBlues" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/cleanblues_dark</item>
+        <item name="colorPrimaryDark">@color/cleanblues_dark</item>
+        <item name="colorAccent">@color/cleanblues_light</item>
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Modern" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/modern_darker</item>
+        <item name="colorPrimaryDark">@color/modern_darker</item>
+        <item name="colorAccent">@color/modern_soft</item>
+        <item name="android:windowBackground">@color/modern_light</item>
+    </style>
 
+    <style name="Refreshing" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/refreshing_darker</item>
+        <item name="colorPrimaryDark">@color/refreshing_darker</item>
+        <item name="colorAccent">@android:color/darker_gray</item>
+        <item name="android:windowBackground">@color/refreshing_dark</item>
+    </style>
+
+    <!-- Style applied throughout the application for this theme.  -->
+    <style name="Stylish" parent="DefaultAppTheme">
+
+        <item name="myPriForeColor">@android:color/holo_purple</item>
+        <item name="mySecForeColor">@color/faded_grey</item>
+        <item name="myPriBackColor">@color/stylish_darkgrey</item>
+
+        <item name="myConPriForeColor">@android:color/white</item>
+        <item name="myConSecForeColor">@color/light_grey</item>
+        <item name="myConPriBackColor">@color/stylish_lightgrey</item>
+        <item name="myConSecBackColor">@color/faded_grey</item>
+
+        <item name="myConHighColor">@color/stylish_darkblue</item>
+        <item name="colorAccent">?attr/myConHighColor</item>
+    </style>
+
+    <!-- General !-->
+
+    <!-- Toolbar -->
+    <style name="myToolbarStyle">
+        <item name="titleMargin">10dp</item>
+        <item name="titleTextAppearance">@style/TextAppearance.AppCompat.Large</item>
+        <item name="titleTextColor">?attr/myPriForeColor</item>
+    </style>
+
+    <!-- TabLayout -->
+    <style name="myTabLayoutStyle">
+        <item name="tabSelectedTextColor">?attr/myConPriForeColor</item>
+        <item name="tabTextColor">?attr/myConSecForeColor</item>
+    </style>
+
+    <!-- BottomFloatingButtons -->
     <style name="BottomFloatingButton">
-        <!--
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
-        app:backgroundTint="@color/colorPrimary"
-        -->
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginEnd">16dp</item>
         <item name="android:layout_marginBottom">16dp</item>
         <item name="android:clickable">true</item>
-        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:tint">?attr/myPriForeColor</item>
+        <item name="backgroundTint">?attr/myPriBackColor</item>
     </style>
 
     <style name="BottomAddButton" parent="@style/BottomFloatingButton">
-        <item name="android:src">@drawable/add_icon_foreground</item>
-        <item name="maxImageSize">60dp</item>
+        <item name="android:src">@drawable/ic_round_add</item>
+        <item name="maxImageSize">56dp</item>
     </style>
 
     <style name="BottomDeleteButton" parent="@style/BottomFloatingButton">
-        <item name="android:src">@drawable/ic_delete</item>
-        <item name="maxImageSize">26dp</item>
+        <item name="android:src">@drawable/ic_trashbin</item>
+        <item name="maxImageSize">36dp</item>
     </style>
 
+    <style name="BottomRevertButton" parent="@style/BottomFloatingButton">
+        <item name="android:src">@drawable/ic_revert</item>
+        <item name="maxImageSize">36dp</item>
+    </style>
+
+    <style name="BottomDeselectButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:clickable">true</item>
+        <item name="background">@null</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="rippleColor">@null</item>
+        <item name="android:src">@drawable/ic_deselect</item>
+        <item name="fabSize">mini</item>
+        <item name="maxImageSize">32dp</item>
+    </style>
+
+    <!-- Text -->
     <style name="PlannerText" parent="@android:style/TextAppearance">
         <item name="android:fontFamily">@font/mukta</item>
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">?attr/myConPriForeColor</item>
     </style>
 
-    <style name="PlannerTextLarge" parent="@android:style/TextAppearance">
-        <item name="android:fontFamily">@font/mukta</item>
+    <style name="PlannerTextLarge" parent="PlannerText">
         <item name="android:textSize">28sp</item>
-        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="PlannerSubText" parent="@android:style/TextAppearance">
         <item name="android:fontFamily">@font/mukta</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/faded_grey</item>
+        <item name="android:textColor">?attr/myConSecForeColor</item>
     </style>
 
     <style name="PlannerTitleText" parent="@android:style/TextAppearance">
         <item name="android:fontFamily">@font/mukta</item>
         <item name="android:textSize">28sp</item>
-        <item name="android:textColor">@color/white</item>
+        <!--<item name="android:textColor">@color/white</item>-->
     </style>
 
 </resources>

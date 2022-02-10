@@ -27,9 +27,16 @@ public class CompletedListAdapter extends ListAdapter {
         holder.category.setText(comTask.getCategory());
         holder.time.setText(comTask.getTimeSpentString());
 
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(holder.taskContainer);
+        if(comTask.getTimeSpentString().equals("0:00"))
+            constraintSet.setVisibility(R.id.time_text, ConstraintSet.GONE);
+        holder.taskContainer.setConstraintSet(constraintSet);
+
+
         // Changing the constraints on the time text and category text to be constrained to the
         // right of the time text
-        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet = new ConstraintSet();
         constraintSet.clone(holder.layoutView);
         constraintSet.connect(R.id.task_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
         constraintSet.connect(R.id.category_text, ConstraintSet.END, R.id.time_text, ConstraintSet.START);
@@ -50,7 +57,7 @@ public class CompletedListAdapter extends ListAdapter {
     @Override
     public ListAdapter.ToDoTaskHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.task_container, parent, false);
+        ConstraintLayout v = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.scheduled_task_container, parent, false);
 
         // Creating a task holder object from the inflated layout
         ListAdapter.ToDoTaskHolder vh = new ListAdapter.ToDoTaskHolder(v);

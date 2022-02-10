@@ -14,6 +14,7 @@ import android.os.Bundle;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.deagenstroup.agendaassistant.logic.taskplanning.ActivityCategory;
+import com.deagenstroup.agendaassistant.ui.SelectionListAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
@@ -562,9 +563,11 @@ public class DailyPlannerFragment extends Fragment {
             return;
 
         if(!highlight) {
-            holder.layoutView.setBackgroundColor(Color.TRANSPARENT);
+            SelectionListAdapter.setHolderHighlight(holder, false, this.getContext());
+            //holder.layoutView.setBackgroundColor(Color.TRANSPARENT);
         } else {
-            holder.layoutView.setBackgroundColor(getResources().getColor(R.color.blue_selected));
+            //holder.layoutView.setBackgroundColor(SelectionListAdapter.getHighlightColor(this.getContext()));
+            SelectionListAdapter.setHolderHighlight(holder, true, this.getContext());
         }
     }
 
@@ -669,6 +672,9 @@ public class DailyPlannerFragment extends Fragment {
      * @param inTask
      */
     public void changeTaskTime(final ScheduledToDoTask inTask, final boolean toggleTime) {
+        if(inTask.isUntimedTask())
+            return;
+
         final Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR);
         int minute = calendar.get(Calendar.MINUTE);

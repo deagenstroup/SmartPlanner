@@ -8,6 +8,5 @@
     <item
         android:id="@+id/activityplanner_button"
         android:icon="@drawable/clipboard_foreground"
-        android:iconTint="@android:color/black"
         android:title="@string/activityplanner_button" />
 </menu>

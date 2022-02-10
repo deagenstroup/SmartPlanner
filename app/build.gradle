@@ -6,7 +6,7 @@ android {
         applicationId "com.deagenstroup.agendaassistant"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 8
+        versionCode 9
         versionName "1.0.17"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
