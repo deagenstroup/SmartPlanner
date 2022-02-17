@@ -63,6 +63,10 @@ public class ToDoList {
 			return true;
 		return false;
 	}
+
+	public boolean hasScheduledTasks() {
+		return ( this.getScheduledTasks().size() > 0 );
+	}
 	
 	public ArrayList<CompletedToDoTask> getCompletedTasks() {
 		return completedTasks;

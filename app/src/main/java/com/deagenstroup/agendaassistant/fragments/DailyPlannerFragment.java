@@ -14,6 +14,7 @@ import android.os.Bundle;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.deagenstroup.agendaassistant.logic.taskplanning.ActivityCategory;
+import com.deagenstroup.agendaassistant.logic.taskscheduling.ToDoList;
 import com.deagenstroup.agendaassistant.ui.SelectionListAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -40,6 +41,7 @@ import android.widget.TimePicker;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import com.deagenstroup.agendaassistant.MainActivity;
 import com.deagenstroup.agendaassistant.logic.tasks.ToDoTask;
@@ -60,7 +62,9 @@ import com.deagenstroup.agendaassistant.logic.tasks.ScheduledToDoTask;
  */
 public class DailyPlannerFragment extends Fragment {
 
-    // logic members
+
+
+    // Logic Members
 
     /**
      * Object which contains the main logic of the program
@@ -75,7 +79,7 @@ public class DailyPlannerFragment extends Fragment {
 
 
 
-    // GUI members
+    // GUI Members
 
     /**
      * The top level view which contains all the UI components.
@@ -103,6 +107,9 @@ public class DailyPlannerFragment extends Fragment {
      */
     private FloatingActionButton deleteButton;
 
+    /**
+     * Arrow button used to send scheduled tasks back to the activity planner.
+     */
     private FloatingActionButton revertTaskButton;
 
     /**
@@ -111,6 +118,8 @@ public class DailyPlannerFragment extends Fragment {
     private BroadcastReceiver receiver;
 
 
+
+    // Lifecycle Methods
 
     public DailyPlannerFragment() {
         // Required empty public constructor
@@ -234,6 +243,9 @@ public class DailyPlannerFragment extends Fragment {
             planner.getTaskManager().restartTasks(this);
             setUIActiveMode(true);
             Log.d("TaskManager", "TaskManager was abruptly stopped.");
+        } else {
+            // If the planner was not abruptly stopped, check the previous day for unfinished tasks.
+            this.checkPreviousDay();
         }
 
         planner.printScheduledTasks();
@@ -274,6 +286,9 @@ public class DailyPlannerFragment extends Fragment {
     }
 
 
+
+    // Button Handlers
+
     /**
      * Handler which executes when a user presses the delete button.
      */
@@ -292,25 +307,30 @@ public class DailyPlannerFragment extends Fragment {
     };
 
     /**
-     * The handler which is attached to each of the check buttons inside each viewholder of the
+     * Handler which is attached to each of the check buttons inside each viewholder of the
      * scheduled list RecyclerView.
      */
     private ImageButton.OnClickListener completeButtonListener = new ImageButton.OnClickListener() {
         @Override
         public void onClick(View v) {
-            ScheduledToDoTask currentTask = planner.getTaskManager().getCurrentTask();
+            String selectedTaskName = getSelectedTask().getName();
             MainActivity.showConfirmationDialog("Are you sure you would like to complete \""
-                    + currentTask.getName() + "\"?", new DialogInterface.OnClickListener() {
+                    + selectedTaskName + "\"?", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     int selectedPos = getSelectedTaskPosition();
                     getScheduledListAdapter().unselectHolder();
                     planner.getTaskManager().finishTask(selectedPos);
                     getScheduledListAdapter().notifyItemRemoved(selectedPos);
+                    getMainActivity().saveToFile();
                 }
             }, getContext());
         }
     };
+
+
+
+    // Accessor Methods
 
     public ImageButton.OnClickListener getCompleteButtonListener() {
         return completeButtonListener;
@@ -327,6 +347,20 @@ public class DailyPlannerFragment extends Fragment {
     public int getSelectedTaskPosition() {
         return this.getScheduledListAdapter().getSelectedHolderPosition();
     }
+
+    public ScheduledToDoTask getSelectedTask() {
+        return planner.getTaskManager().getTask(this.getSelectedTaskPosition());
+    }
+
+    public Planner getPlanner() {return planner;}
+
+    public MainActivity getMainActivity() {
+        return (MainActivity) this.getActivity();
+    }
+
+
+
+    // Modifier Methods
 
     /**
      * Removes the currently selected task from the scheduled list and either deletes it or
@@ -346,7 +380,29 @@ public class DailyPlannerFragment extends Fragment {
         planner = inPlanner;
     }
 
-    public Planner getPlanner() {return planner;}
+    public void checkPreviousDay() {
+
+        // Check if the previous day has unfinished tasks.
+        final LocalDate yesterday = LocalDate.now().plusDays(-1);
+        ToDoList list = planner.getCalendar().getToDoList(yesterday);
+        if(!list.hasScheduledTasks())
+            return;
+
+        // Prompt the user if they would like to transfer unfinished tasks from the previous day's
+        // schedule to today's schedule.
+        DialogInterface.OnClickListener transferHandler = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Log.d("DailyPlannerFragment", "User would like to transfer tasks.");
+                planner.getCalendar().transferTasks(yesterday, LocalDate.now());
+                scheduledListView.getAdapter().notifyDataSetChanged();
+                getMainActivity().saveToFile();
+            }
+        };
+        String message = "Would you like to transfer yesterday's unfinished tasks to today?";
+        MainActivity.showConfirmationDialog(message, transferHandler, this.getContext());
+
+    }
 
 
 
@@ -586,7 +642,9 @@ public class DailyPlannerFragment extends Fragment {
     }
 
     public void updateAppBar() {
-        ((MainActivity)getActivity()).getToolbar().setTitle(planner.getDateText());
+        LocalDate date = this.getPlanner().getDate();
+        String dateStr = date.format(DateTimeFormatter.ofPattern("EEE, LLL d"));
+        this.getMainActivity().getToolbar().setTitle(dateStr);
     }
 
 

@@ -5,6 +5,10 @@ import java.io.*;
 
 import com.deagenstroup.agendaassistant.logic.tasks.ToDoTask;
 
+
+/**
+ * A collection of ToDoTasks, yet to be scheduled by the user, of the same general category.
+ */
 public class ActivityCategory {
 
 	private String name;

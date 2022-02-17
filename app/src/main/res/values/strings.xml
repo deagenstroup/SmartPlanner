@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">AgendaAssist</string>
 
-    <string name="dailyplanner_appbar_title">DD/MM/YYYY</string>
+    <string name="dailyplanner_appbar_title">Tuesday, Jan 1</string>
 
     <string name="date_option_title">Change Date</string>
     <string name="task_toggle_option_title">Start/Stop Tasks</string>
@@ -28,4 +28,5 @@
     <string name="total_time_text">Total Time Tracked:</string>
     <string name="average_time_text">Average Task Length:</string>
     <string name="help_button_text">Help/Tutorial</string>
+    <string name="save_button_text">Manual Save</string>
 </resources>

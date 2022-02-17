@@ -47,7 +47,7 @@
     <!-- Style applied throughout the application for this theme.  -->
     <style name="Stylish" parent="DefaultAppTheme">
 
-        <item name="myPriForeColor">@android:color/holo_purple</item>
+        <item name="myPriForeColor">@android:color/white</item>
         <item name="mySecForeColor">@color/faded_grey</item>
         <item name="myPriBackColor">@color/stylish_darkgrey</item>
 

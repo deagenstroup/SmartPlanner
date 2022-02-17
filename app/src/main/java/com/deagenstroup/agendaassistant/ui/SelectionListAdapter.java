@@ -20,7 +20,9 @@ import com.deagenstroup.agendaassistant.logic.Planner;
  */
 public abstract class SelectionListAdapter<T extends SelectionListAdapter.SelectionHolder> extends RecyclerView.Adapter<T> {
 
-    protected Fragment fragment;
+
+
+    // Logic members.
 
     protected Planner planner;
 
@@ -29,6 +31,12 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
      * no selection or holder moving operations are performed.
      */
     protected boolean allowOperations = true;
+
+
+
+    // UI Members.
+
+    protected Fragment fragment;
 
     /**
      * The SelectedHolder object which is currently selected by the user.
@@ -39,6 +47,10 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
      * The SelectionHolder which was just clicked by the user.
      */
     protected SelectionHolder clickedHolder = null;
+
+    private HolderListener holderListener;
+
+
 
     /**
      * A class which represents a single item within the RecyclerView.
@@ -52,8 +64,6 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
             taskContainer = layoutView.findViewById(R.id.task_container);
         }
     }
-
-    private HolderListener holderListener;
 
     /**
      * Handler for the click of a holder in the recyclerview.
@@ -107,9 +117,22 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
     public SelectionListAdapter(Planner inPlanner, Fragment inFragment) {
         planner = inPlanner;
         fragment = inFragment;
-
-
     }
+
+
+    // Accessors
+
+    public int getSelectedHolderPosition() {
+        return selectedHolder.getAdapterPosition();
+    }
+
+    public boolean hasSelected() {
+        return selectedHolder != null;
+    }
+
+
+
+    // Modifiers
 
     @Override
     public void onBindViewHolder(final SelectionHolder holder, int position) {
@@ -117,6 +140,28 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
         HolderListener listener = new HolderListener(holder);
         holder.layoutView.setOnClickListener(listener);
         holder.layoutView.setOnLongClickListener(listener);
+    }
+
+    public void selectHolder(SelectionHolder inHolder) {
+        selectedHolder = inHolder;
+        setHolderHighlight(selectedHolder, true, fragment.getContext());
+    }
+
+    public void setAllowOperations(boolean status) {
+        allowOperations = status;
+    }
+
+    /**
+     * Unselect the currently selected holder.
+     * @return The SelectionHolder that was unselected. Null if no SelectionHolder was selected.
+     */
+    public SelectionHolder unselectHolder() {
+        SelectionHolder returnHolder = selectedHolder;
+        if(selectedHolder != null) {
+            setHolderHighlight(selectedHolder, false, fragment.getContext());
+            selectedHolder = null;
+        }
+        return returnHolder;
     }
 
     /**
@@ -133,35 +178,11 @@ public abstract class SelectionListAdapter<T extends SelectionListAdapter.Select
      */
     public abstract void moveItem(int fromPos, int toPos);
 
-    public void selectHolder(SelectionHolder inHolder) {
-        selectedHolder = inHolder;
-        setHolderHighlight(selectedHolder, true, fragment.getContext());
-    }
 
-    /**
-     * Unselect the currently selected holder.
-     * @return The SelectionHolder that was unselected. Null if no SelectionHolder was selected.
-     */
-    public SelectionHolder unselectHolder() {
-        SelectionHolder returnHolder = selectedHolder;
-        if(selectedHolder != null) {
-            setHolderHighlight(selectedHolder, false, fragment.getContext());
-            selectedHolder = null;
-        }
-        return returnHolder;
-    }
 
-    public boolean hasSelected() {
-        return selectedHolder != null;
-    }
 
-    public int getSelectedHolderPosition() {
-        return selectedHolder.getAdapterPosition();
-    }
 
-    public void setAllowOperations(boolean status) {
-        allowOperations = status;
-    }
+
 
     public static void setHolderHighlight(SelectionHolder inHolder, boolean hightlight, Context context) {
         if(hightlight) {

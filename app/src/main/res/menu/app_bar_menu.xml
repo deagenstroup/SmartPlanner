@@ -26,5 +26,12 @@
         android:orderInCategory="30"
         android:title="@string/help_button_text"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/save_button"
+        android:icon="@drawable/ic_save"
+        android:orderInCategory="40"
+        android:title="@string/save_button_text"
+        app:maxImageSize="64dp"
+        app:showAsAction="ifRoom"/>
 
 </menu>

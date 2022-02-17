@@ -18,11 +18,12 @@ import com.deagenstroup.agendaassistant.service.TaskManagerService;
 
 
 /**
- * Handles logic of actively managing tasks. TaskManager can be put into an active mode where it periodically
- * increases the amount of time spent on the current task and pauses if the full time has been
- * spent to wait for user input. TaskManager can also extend and cut short the time allocated for
- * the current task. TaskManager is designed to provide real-time accountability and tracking
- * to the user for the ToDoList they have created separate of the user interface.
+ * Handles logic of actively managing tasks. Is the logic counterpart to the ActivityPlanner in the UI.
+ * TaskManager can be put into an active mode where it periodically increases the amount of time
+ * spent on the current task and pauses if the full time has been spent to wait for user input.
+ * TaskManager can also manipulate scheduled and completed tasks for the selected ToDoList.
+ * TaskManager is designed to provide real-time accountability and tracking to the user for the
+ * ToDoList they are currently working on (which is only ever the single list of the selected day).
  * @author Deagen Stroup
  */
 public class TaskManager {
@@ -70,8 +71,6 @@ public class TaskManager {
 
 
 
-
-
 	public boolean isActive() {
 		return active;
 	}
@@ -81,12 +80,18 @@ public class TaskManager {
 	}
 
 	/**
+	 * Gets the task at the top of the list, presumably the task the user is working on or will work
+	 * on next for now.
 	 * @return The task which is currently being worked on by the user.
 	 */
 	public ScheduledToDoTask getCurrentTask() {
 		if(list == null)
 			return null;
 		return list.getCurrentTask();
+	}
+
+	public ScheduledToDoTask getTask(int i) {
+		return list.getTask(i);
 	}
 
 
@@ -191,6 +196,10 @@ public class TaskManager {
 		return true;
 	}
 
+
+
+	// TaskManagerService methods.
+
 	private void startTaskManagerService() {
 		// starting the background service to notify the user
 		Context context = fragment.getContext();
@@ -235,6 +244,10 @@ public class TaskManager {
 		service.setStopFlag(true);
 	}
 
+
+
+	// File I/O.
+
 	public void saveToFile() {
 		if (fragment != null) {
 			MainActivity mainActivity = (MainActivity) fragment.getActivity();
@@ -262,54 +275,6 @@ public class TaskManager {
 		}
 	}
 
-	/**
-	 * Extends the amount of time allocated for the task currently being completed
-	 * @param timeExtension The amount of time by which the current task is to be extended
-	 */
-	public void extendCurrentActivity(Duration timeExtension) {
-		this.getCurrentTask().extendTime(timeExtension);
-	}
 
-	/**
-	 * Cuts short the amount of time allocated for the task currently being completed
-	 * @param timeCut The amount of time by which the current task is to be cut short
-	 */
-	public void cutShortCurrentActivity(Duration timeCut) {
-		this.getCurrentTask().cutShortTime(timeCut);
-	}
 
-	//	public void checkCurrentTask() {
-//		if(this.getCurrentTask().isFinished()) {
-//			userInterface.preEndTaskUpdate();
-//			list.finishCurrentTask();
-//			userInterface.postEndTaskUpdate();
-//			if(list.getNumberOfScheduledTasks() == 0 && this.active == true) {
-//				this.active = false;
-//			}
-//		}
-//	}
-
-//	// Obsulete code which uses AsyncTask implementation
-//	// new implementation uses background service
-//	private class TaskRunner extends AsyncTask<String, String, String> {
-//		@Override
-//		protected String doInBackground(String... params) {
-//			do {
-//				try {
-//					Thread.sleep(1000);
-//					spendTimeOnCurrentTask(Duration.ofSeconds(1L));
-//					if(active)
-//						publishProgress();
-//				} catch(InterruptedException e) {
-//					System.out.println(e.getStackTrace());
-//				}
-//			} while(active);
-//			return "null";
-//		}
-//
-//		@Override
-//		protected void onProgressUpdate(String... text) {
-//			userInterface.updateCurrentTask();
-//		}
-//	}
 }

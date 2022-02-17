@@ -49,22 +49,37 @@ public class MainActivity extends AppCompatActivity
                     BottomNavigationView.OnNavigationItemSelectedListener {
 
     /**
+     * If true, a seperate testing file is used to save planner data and other
+     */
+    public static boolean TESTING = false;
+
+    /**
      * The filename used to save the data of the planner
      */
-
-    public static boolean ADS_ENABLED = false;
-    public static boolean TESTING = false;
     private static String mainFileName = (TESTING ? "testingfile.dat" : "plannerfile.dat");
 
+    /**
+     * If true, the add banner at the top of the screen is enabled
+     */
+    public static boolean ADS_ENABLED = false;
+
+
+
     private Toolbar toolbar;
+
     private Menu mAppBarMenu;
+
     private AdView bannerAd;
+
     private DailyPlannerFragment dailyPlanner;
+
     private ActivityPlannerFragment activityPlanner;
+
     private Planner planner;
+
     private BackKeyListener backKeyListener;
 
-//    private boolean updateDailyPlannerUIFlag = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,50 +135,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.app_bar_menu, menu);
-        mAppBarMenu = menu;
-        this.updateToggleButtonImage();
-        return true;
-    }
 
-//    public void setUpdateDailyPlannerUIFlag(boolean inFlag) {
-//        updateDailyPlannerUIFlag = inFlag;
-//    }
 
-    public void updateToggleButtonImage() {
-        if(planner.getTaskManager().isActive())
-            mAppBarMenu.findItem(R.id.task_toggle_option)
-                .setIcon(R.drawable.ic_round_pause);
-        else {
-            getAppBarMenu()
-                    .findItem(R.id.task_toggle_option)
-                    .setIcon(R.drawable.ic_round_arrow);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.task_toggle_option:
-                this.getDailyPlannerFragment().toggleActiveMode();
-                return true;
-            case R.id.change_date_option:
-                this.getDailyPlannerFragment().switchDates();
-                return true;
-            case R.id.break_option:
-                this.getDailyPlannerFragment().startBreakTask();
-                return true;
-            case R.id.help_button:
-                watchYoutubeVideo(getApplicationContext(), "mUratXVA1BA");
-                return true;
-            default:
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    //fragment manipulation methods
+    //  Fragment manipulation methods
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -183,6 +157,12 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
+    public DailyPlannerFragment getDailyPlannerFragment() {
+        return dailyPlanner;
+    }
+
+    public ActivityPlannerFragment getActivityPlannerFragment() { return activityPlanner; }
+
     public void switchFragments(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if(this.getVisibleFragment() != null)
@@ -199,6 +179,57 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
+
+    // Toolbar methods.
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.app_bar_menu, menu);
+        mAppBarMenu = menu;
+        this.updateToggleButtonImage();
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.task_toggle_option:
+                this.getDailyPlannerFragment().toggleActiveMode();
+                return true;
+            case R.id.change_date_option:
+                this.getDailyPlannerFragment().switchDates();
+                return true;
+            case R.id.break_option:
+                this.getDailyPlannerFragment().startBreakTask();
+                return true;
+            case R.id.help_button:
+                watchYoutubeVideo(getApplicationContext(), "mUratXVA1BA");
+                return true;
+            case R.id.save_button:
+                this.saveToFile();
+                return true;
+            default:
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public Toolbar getToolbar() {
+        return toolbar;
+    }
+
+    public Menu getAppBarMenu() { return mAppBarMenu; }
+
+    public void updateToggleButtonImage() {
+        if(planner.getTaskManager().isActive())
+            mAppBarMenu.findItem(R.id.task_toggle_option)
+                    .setIcon(R.drawable.ic_round_pause);
+        else {
+            getAppBarMenu()
+                    .findItem(R.id.task_toggle_option)
+                    .setIcon(R.drawable.ic_round_arrow);
+        }
+    }
+
     public void setDailyPlannerButtonsVisibility(boolean visible) {
         MenuItem dateItem = mAppBarMenu.findItem(R.id.change_date_option);
         MenuItem breakItem = mAppBarMenu.findItem(R.id.break_option);
@@ -208,19 +239,24 @@ public class MainActivity extends AppCompatActivity
         pauseButton.setVisible(visible);
     }
 
-    public DailyPlannerFragment getDailyPlannerFragment() {
-        return dailyPlanner;
+
+
+    // Navigation button methods
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("DEBUG", "User has switched away from the application");
     }
 
-    public ActivityPlannerFragment getActivityPlannerFragment() { return activityPlanner; }
-
-    public Toolbar getToolbar() {
-        return toolbar;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        TaskManager taskManager = planner.getTaskManager();
+        if(taskManager.isActive())
+            taskManager.stopTasks();
+        planner.save(mainFileName);
     }
-
-    public Menu getAppBarMenu() { return mAppBarMenu; }
-
-    //navigation button methods
 
     /**
      * Emulates the user taping the navigation buttons at the bottom of the screen to switch
@@ -254,22 +290,9 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("DEBUG", "User has switched away from the application");
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        TaskManager taskManager = planner.getTaskManager();
-        if(taskManager.isActive())
-            taskManager.stopTasks();
-        planner.save(mainFileName);
-    }
 
-    //back button methods
+    // Back button methods
 
     @Override
     public void onBackPressed() {
@@ -289,7 +312,9 @@ public class MainActivity extends AppCompatActivity
         void onBackKeyPressed();
     }
 
-    //file I/O methods
+
+
+    // File I/O methods
 
     public void saveToFile() {
         if(TESTING)
@@ -320,6 +345,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+
+    // Generic UI helper functions.
     /**
      * Prompts the user to ask if they are sure they would like to do the specified action.
      * @param displayMessage The text to display to the user in the dialog.
